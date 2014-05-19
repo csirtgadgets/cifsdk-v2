@@ -21,6 +21,7 @@ It defines classes_and_methods
 
 import sys
 import os
+import cif.sdk
 from cif.sdk.client import Client
 from prettytable import PrettyTable
 import ConfigParser
