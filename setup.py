@@ -20,10 +20,10 @@ setup(name="cif-sdk",
     author="Wes Young",
     author_email="wes@barely3am.com",
     packages = ["cif",
-                "cif.sdk",
-                "cif.sdk.Client"],
+                "cif.sdk"],
     install_requires = [
         "requests>=2.0"
+        "json",
     ],
     scripts=['bin/cifpy'],
 )
