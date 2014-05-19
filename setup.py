@@ -2,9 +2,11 @@ try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
+    
+import cif.sdk
 
 setup(name="cif-sdk",
-    version="0.1",
+    version=cif.sdk.__version__,
     description="CIF Python SDK",
     long_description="",
     url="https://github.com/csirtgadgets/cif-sdk-python",

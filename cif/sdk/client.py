@@ -2,6 +2,7 @@ import json
 import requests
 import time
 import logging
+import cif.sdk
 
 class Client(object):
 
@@ -17,7 +18,8 @@ class Client(object):
         
         self.session = requests.session()
         self.session.headers["Accept"] = "application/json"
-        
+        self.session.headers['User-Agent'] = 'cif-sdk-python/' + cif.sdk.__version__
+                
     def search(self, **kwargs):
         confidence = kwargs.get('confidence')
         query = kwargs.get('query')
