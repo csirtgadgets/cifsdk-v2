@@ -27,7 +27,8 @@ class Client(object):
         token = kwargs.get('token') or self.token()
         group = kwargs.get('group')
        
-        uri = self.host + ':' + str(self.port) + '/' + query + '?token=' + token 
+        uri = self.host + '/' + query + '?token=' + token
+        self.logger.debug(uri)
          
         if group:
             uri += '&group=' + group
