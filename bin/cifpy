@@ -27,6 +27,7 @@ from prettytable import PrettyTable
 import ConfigParser
 import logging
 import traceback
+import select
 import pprint
 pp = pprint.PrettyPrinter()
 
@@ -147,7 +148,6 @@ USAGE
             for num in range(0,4):
                 ret = Client(**options).ping()
                 print "roundtrip: %s ms" % ret
-                import select
                 select.select([],[],[],1) ## TODO -- does this work on windows?
         elif(options.get('submit')):
             ret = Client(**options).submit(**options)
