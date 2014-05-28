@@ -101,13 +101,13 @@ USAGE
         # Setup argument parser
         parser = ArgumentParser(description=program_license, formatter_class=RawDescriptionHelpFormatter)
         parser.add_argument("-v", "--verbose", dest="verbose", action="count", help="set verbosity level [default: %(default)s]")
+        parser.add_argument('-d', '--debug', dest='debug', action="store_true")
         parser.add_argument("-q", "--query", dest="query", help="query for observable")
         parser.add_argument('-T', '--token', dest='token', help="specify token")
-        parser.add_argument('-c', '--confidence', dest="confidence", help="specify confidence", metavar="CONFIDENCE")
-        parser.add_argument('-l', '--limit', dest="limit", help="result limit", default=500, metavar="LIMIT")
-        parser.add_argument('-Z', '--no-verify-ssl', dest="noverifyssl", action="store_true")
-        parser.add_argument('-H', '--host', dest="host", help="url of host", metavar="HOST")
-        parser.add_argument('-P', '--port', dest="port", help="port [default: %(default)s]", default="443")
+        parser.add_argument('-c', '--confidence', dest="confidence", help="specify confidence")
+        parser.add_argument('-l', '--limit', dest="limit", help="result limit", default=500)
+        parser.add_argument('--no-verify-ssl', dest="noverifyssl", action="store_true", default=False)
+        parser.add_argument('-R', '--remote', dest="remote", help="remote api location (eg: https://example.com/api)")
         parser.add_argument('-t', '--timeout', dest="timeout", help='connection timeout [default: %(default)s]', default="300")
         parser.add_argument('-C', '--config', dest="config", help="configuration file [default: %(default)s]", default=os.path.expanduser("~/.cif") )
         parser.add_argument('-p', '--ping', dest="ping", action="store_true", help="ping")
@@ -144,7 +144,11 @@ USAGE
             ret = Client(**options).search(**options)
             make_table(ret)
         elif(options.get('ping')):
-            ret = Client(**options).ping(**options)
+            for num in range(0,4):
+                ret = Client(**options).ping()
+                print "roundtrip: %s ms" % ret
+                import select
+                select.select([],[],[],1) ## TODO -- does this work on windows?
         elif(options.get('submit')):
             ret = Client(**options).submit(**options)
             make_table(ret)

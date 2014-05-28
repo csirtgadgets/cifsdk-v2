@@ -3,18 +3,24 @@ import requests
 import time
 import logging
 import cif.sdk
+import pprint
+pp = pprint.PrettyPrinter()
+import sys
 
 class Client(object):
 
     def __init__(self, **kwargs):
         self.logger = kwargs.get('logger') or logging.getLogger(__name__)
         
-        self.host = kwargs.get('host')
+        self.remote = kwargs.get('remote') or 'https://localhost/api'
         self.token = kwargs.get('token')
-        self.port = kwargs.get('port')
         self.proxy = kwargs.get('proxy')
         self.timeout = kwargs.get('timeout')
-        self.no_verify_ssl = kwargs.get('noverifyssl')
+
+        if kwargs.get('noverifyssl'):
+            self.verify_ssl = False
+        else:
+            self.verify_ssl = True
         
         self.session = requests.session()
         self.session.headers["Accept"] = "application/json"
@@ -27,7 +33,7 @@ class Client(object):
         token = kwargs.get('token') or self.token()
         group = kwargs.get('group')
        
-        uri = self.host + '/' + query + '?token=' + token
+        uri = self.remote + '/' + query + '?token=' + token
         self.logger.debug(uri)
          
         if group:
@@ -38,9 +44,9 @@ class Client(object):
             uri += '&limit=' + str(limit)
        
         self.logger.debug(uri)
-         
-        body = self.session.get(uri, verify=self.no_verify_ssl)
-       
+        
+        body = self.session.get(uri, verify=self.verify_ssl)
+        
         self.logger.debug('status code: ' + str(body.status_code))
         if body.status_code > 299:
             self.logger.error('request failed: %s' % str(body.status_code))
@@ -59,9 +65,9 @@ class Client(object):
 
         if not body: return None
         
-        uri = self.host + ':' + str(self.port) + '/?token=' + token
+        uri = self.remote + '/?token=' + token
          
-        body = self.session.post(uri,data=body,verify=self.no_verify_ssl)
+        body = self.session.post(uri,data=body,verify=self.verify_ssl)
         self.logger.debug('status code: ' + str(body.status_code))
         if body.status_code > 299:
             self.logger.error('request failed: %s' % str(body.status_code))
@@ -73,14 +79,14 @@ class Client(object):
     
     def ping(self):
         t0 = time.time()
-        uri = self.host + ':' + self.port + '/_ping?token=' + self.token
-        body = self.session.get(uri)
+        uri = str(self.remote) + '/_ping?token=' + str(self.token)
+        body = self.session.get(uri,verify=self.verify_ssl)
         
         self.logger.debug('status code: ' + str(body.status_code))
         if body.status_code > 299:
             self.logger.error('request failed: %s' % str(body.status_code))
             return 'request failed: %s' % str(body.status_code)
         
-        t1 = time.time();
-        self.logger.debug('return time: %.15f' % (t1-t0))
-        return (t1-t0)
+        t1 = (time.time() - t0)
+        self.logger.debug('return time: %.15f' % t1)
+        return t1
