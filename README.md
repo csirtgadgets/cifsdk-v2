@@ -26,6 +26,7 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
 #### Search
   ```python
   from cif.sdk.client import Client
+  from prettytable import PrettyTable
   
   def make_table(r):
     cols = ['id','provider','tlp','group','observable','confidence',
