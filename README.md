@@ -3,7 +3,7 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
 
 [![Build Status](https://travis-ci.org/csirtgadgets/cif-sdk-python.png?branch=master)](https://travis-ci.org/csirtgadgets/cif-sdk-python)
 
-## Installation
+# Installation
  * get the [latest release](https://github.com/csirtgadgets/cif-sdk-python/releases)
  * install the SDK  
 
@@ -16,14 +16,14 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
   $ sudo python setup.py install
   ```
   
-## Examples
-### Client
+# Examples
+## Client
   ```bash
   $ cifpy -T 1234 -R 'https://localhost/api' -q example.com
   ```
   
-### API
-#### Search
+## API
+### Search
   ```python
   from cif.sdk.client import Client
   
@@ -54,7 +54,7 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
   ret = cli.search(query='example.com')
   make_table(ret)
   ```
-#### Ping
+### Ping
   ```python
   from cif.sdk.client import Client
   ...
@@ -62,3 +62,6 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
   ret = cli.ping()
   print "roundtrip: %s ms" % ret
   ```
+
+# License and Copyright
+Free use of this software is granted under the terms of the GNU Lesser General Public License (LGPLv3). For details see the files `COPYING` included with the distribution.
