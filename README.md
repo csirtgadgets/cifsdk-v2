@@ -23,6 +23,7 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
   ```
   
 ### API
+#### Search
   ```python
   from cif.sdk.client import Client
   
@@ -50,9 +51,14 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
                remote='https://localhost2:8443',
                noverifyssl=1)
   
-  ret = cli.ping()
-  print "roundtrip: %s ms" % ret
-  
   ret = cli.search(query='example.com')
   make_table(ret)
+  ```
+#### Ping
+  ```python
+  from cif.sdk.client import Client
+  ...
+  
+  ret = cli.ping()
+  print "roundtrip: %s ms" % ret
   ```
