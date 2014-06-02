@@ -17,8 +17,7 @@ setup(name="cif-sdk",
     keywords='CIF',
     author="Wes Young",
     author_email="wes@barely3am.com",
-    packages = ["cif",
-                "cif.sdk"],
+    packages = ["cif.sdk",'cif.sdk.tests'],
     install_requires = [
         "requests>=2.0"
         "json",
