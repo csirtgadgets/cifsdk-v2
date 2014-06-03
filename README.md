@@ -4,12 +4,7 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
 [![Build Status](https://travis-ci.org/csirtgadgets/cif-sdk-python.png?branch=master)](https://travis-ci.org/csirtgadgets/cif-sdk-python)
 
 # Installation
- * get the [latest release](https://github.com/csirtgadgets/cif-sdk-python/releases)
- * install the SDK  
-
   ```bash
-  $ tar -zxvf cif-sdk-x.x.x.tar.gz
-  $ cd cif-sdk
   $ python setup.py build
   $ python setup.py test
   $ python -m unittest discover
