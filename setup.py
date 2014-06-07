@@ -2,7 +2,7 @@ from setuptools import setup
 
 import cif.sdk
 setup(
-      name="pycif-sdk",
+      name="cif-sdk",
       version=cif.sdk.__version__,
       description="CIF Python SDK",
       long_description="CIF Software Development Kit for Python",
@@ -19,10 +19,8 @@ setup(
       author="Wes Young",
       author_email="wes@barely3am.com",
       packages = ["cif","cif.sdk","test"],
-      install_requires = [
-                          "requests>=2.0"
-                          "json",
-                          ],
+      install_requires = ["requests>=2.0"
+                          "json"],
       scripts=['bin/cif'],
       test_suite = "test"
 )
