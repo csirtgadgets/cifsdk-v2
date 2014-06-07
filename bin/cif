@@ -114,7 +114,8 @@ USAGE
         parser.add_argument('-p', '--ping', dest="ping", action="store_true", help="ping")
         parser.add_argument('--submit', help="submit json string")
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
-    
+        parser.add_argument('-n', '--nolog', help='do not log the search', default=False, action="store_true")
+        
         # Process arguments
         args = parser.parse_args()
         
@@ -122,6 +123,8 @@ USAGE
         fmt = '%(asctime)s - %(levelname)s - %(name)s::%(threadName)s - %(message)s'
         loglevel = logging.WARNING
         if args.verbose:
+            loglevel = logging.INFO
+        if args.debug:
             loglevel = logging.DEBUG
         
         console = logging.StreamHandler()

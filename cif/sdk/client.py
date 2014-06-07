@@ -25,23 +25,27 @@ class Client(object):
         self.session = requests.session()
         self.session.headers["Accept"] = "application/json"
         self.session.headers['User-Agent'] = 'cif-sdk-python/' + cif.sdk.__version__
-                
-    def search(self, **kwargs):
-        confidence = kwargs.get('confidence')
-        query = kwargs.get('query')
-        limit = kwargs.get('limit') or 500
-        token = kwargs.get('token') or self.token()
-        group = kwargs.get('group')
-       
+    
+    def search(self,query=None,remote=None,limit=500,token=None,group=None,nolog=False,confidence=None,*args,**kwargs):
+        if not token:
+            token = self.token
+        
+        if not remote:
+            remote = self.remote
+            
         uri = self.remote + '/' + query + '?token=' + token
         self.logger.debug(uri)
          
+        ## TODO - pass these into requests by param
         if group:
             uri += '&group=' + group
         if confidence:
             uri += '&confidence=' + confidence
         if limit:
             uri += '&limit=' + str(limit)
+            
+        if nolog:
+            uri += '&nolog=1'
        
         self.logger.debug(uri)
         
