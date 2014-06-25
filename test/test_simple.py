@@ -5,7 +5,7 @@ class TestClient(unittest.TestCase):
 
     def setUp(self):
         self.cli = Client(token=1234,remote='https://localhost2:8443',
-                          noverifyssl=1)
+                          no_verify_ssl=1)
         
     def test_remote(self):
         self.assertEqual(self.cli.remote,'https://localhost2:8443','remote-mismatch')
