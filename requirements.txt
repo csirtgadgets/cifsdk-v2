@@ -1,1 +1,2 @@
 requests>=2.0
+PrettyTable>=0.7.2
