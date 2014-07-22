@@ -27,9 +27,10 @@ class Client(object):
         self.session.headers['User-Agent'] = 'cif-sdk-python/' + cif.sdk.__version__
     
     def search(self,query=None,remote=None,limit=500,token=None,group=None,nolog=False,confidence=None,*args,**kwargs):
-        if not token:
+        if not token and self.token:
             token = self.token
-        
+        elif not self.token:
+            raise Exception("Required token for server not provided")
         if not remote:
             remote = self.remote
             
