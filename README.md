@@ -18,7 +18,7 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
 # Examples
 ## Client
   ```bash
-  $ cif -T 1234 -R 'https://localhost/api' -q example.com
+  $ cif -T 1234 -R 'https://localhost/v2' -q example.com
   ```
   
 ## API
