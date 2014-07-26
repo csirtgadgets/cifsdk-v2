@@ -32,7 +32,8 @@ class Client(object):
                nolog=False,confidence=None,*args,**kwargs):
         if not token:
             token = self.token
-        
+        elif not self.token:
+            raise Exception("Required token for server not provided")
         if not remote:
             remote = self.remote
             
