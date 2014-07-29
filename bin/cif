@@ -107,7 +107,7 @@ USAGE
         parser.add_argument('-T', '--token', dest='token', help="specify token")
         parser.add_argument('-c', '--confidence', dest="confidence", help="specify confidence")
         parser.add_argument('-l', '--limit', dest="limit", help="result limit", default=500)
-        parser.add_argument('--no-verify-ssl', dest="noverifyssl", action="store_true", default=False)
+        parser.add_argument('--no-verify-ssl', dest="no_verify_ssl", action="store_true", default=False)
         parser.add_argument('-R', '--remote', dest="remote", help="remote api location (eg: https://example.com/v2)")
         parser.add_argument('-t', '--timeout', dest="timeout", help='connection timeout [default: %(default)s]', default="300")
         parser.add_argument('-C', '--config', dest="config", help="configuration file [default: %(default)s]", default=os.path.expanduser("~/.cif") )
