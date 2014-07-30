@@ -49,7 +49,7 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
   
   cli = Client(token=1234,
                remote='https://localhost2:8443',
-               noverifyssl=1)
+               no_verify_ssl=1)
   
   ret = cli.search(query='example.com')
   make_table(ret)
