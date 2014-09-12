@@ -20,7 +20,8 @@ setup(
       author_email="wes@barely3am.com",
       packages = ["cif","cif.sdk","test"],
       install_requires = ["requests>=2.0"
-                          "json"],
+                          "json",
+                          'pyyaml'],
       scripts=['bin/cif'],
       test_suite = "test"
 )

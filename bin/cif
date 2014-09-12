@@ -1,30 +1,12 @@
 #!/usr/bin/env python
 # encoding: utf-8
-'''
-example python client for the python CIF SDK
-
-cif is a description
-
-It defines classes_and_methods
-
-@author:     github.com/wesyoung
-        
-@copyright:  2014 CSIRT Gadgets Foundation. All rights reserved.
-        
-@license:    Apache 2.0
-
-@contact:    github.com/wesyoung
-@deffield    updated: Updated
-
-@organization: CSIRT Gadgets Foundation
-'''
 
 import sys
-import os
+import os, os.path
 import cif.sdk
 from cif.sdk.client import Client
 from prettytable import PrettyTable
-import ConfigParser
+import yaml
 import logging
 import traceback
 import select
@@ -83,24 +65,10 @@ def main(argv=None): # IGNORE:C0111
     program_version = "v%s" % __version__
     program_build_date = str(__updated__)
     program_version_message = '%%(prog)s %s (%s)' % (program_version, program_build_date)
-    program_shortdesc = __import__('__main__').__doc__.split("\n")[1]
-    program_license = '''%s
-
-  Created by github.com/wesyoung on %s.
-  Copyright 2014 organization_name. All rights reserved.
-  
-  Licensed under the Apache License 2.0
-  http://www.apache.org/licenses/LICENSE-2.0
-  
-  Distributed on an "AS IS" basis without warranties
-  or conditions of any kind, either express or implied.
-
-USAGE
-''' % (program_shortdesc, str(__date__))
 
     try:
         # Setup argument parser
-        parser = ArgumentParser(description=program_license, formatter_class=RawDescriptionHelpFormatter)
+        parser = ArgumentParser(description='', formatter_class=RawDescriptionHelpFormatter)
         parser.add_argument("-v", "--verbose", dest="verbose", action="count", help="set verbosity level [default: %(default)s]")
         parser.add_argument('-d', '--debug', dest='debug', action="store_true")
         parser.add_argument("-q", "--query", dest="query", help="query for observable")
@@ -108,7 +76,7 @@ USAGE
         parser.add_argument('-c', '--confidence', dest="confidence", help="specify confidence")
         parser.add_argument('-l', '--limit', dest="limit", help="result limit", default=500)
         parser.add_argument('--no-verify-ssl', dest="no_verify_ssl", action="store_true", default=False)
-        parser.add_argument('-R', '--remote', dest="remote", help="remote api location (eg: https://example.com/v2)")
+        parser.add_argument('-R', '--remote', dest="remote", help="remote api location (eg: https://example.com)")
         parser.add_argument('-t', '--timeout', dest="timeout", help='connection timeout [default: %(default)s]', default="300")
         parser.add_argument('-C', '--config', dest="config", help="configuration file [default: %(default)s]", default=os.path.expanduser("~/.cif") )
         parser.add_argument('-p', '--ping', dest="ping", action="store_true", help="ping")
@@ -134,15 +102,17 @@ USAGE
         logger = logging.getLogger(__name__)
 
         options = vars(args)
-        
-        c = ConfigParser.ConfigParser()
-        if c.read([args.config]):
-            if not c.has_section('client'):
+
+        if os.path.isfile(args.config):
+            f = file(args.config)
+            config = yaml.load(f)
+            f.close()
+            if not config['client']:
                 raise Exception("Unable to read " + args.config + " config file")
-            v = dict(c.items("client"))
-            for k in v:
+            config = config['client']
+            for k in config:
                 if not options.get(k):
-                    options[k] = v[k]
+                    options[k] = config[k]
         
         if(options.get('query')):
             ret = Client(**options).search(**options)
