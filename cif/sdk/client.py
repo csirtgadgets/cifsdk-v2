@@ -25,8 +25,7 @@ class Client(object):
             self.verify_ssl = True
         
         self.session = requests.session()
-        self.session.headers["Accept"] = "application/json"
-        self.session.headers["X-CIF-Media-Type"] = 'vnd.cif.' + cif.sdk.__api_version__
+        self.session.headers["Accept"] = 'application/vnd.cif.v' + cif.sdk.__api_version__ + 'json'
         self.session.headers['User-Agent'] = 'cif-sdk-python/' + cif.sdk.__version__
     
     def search(self,query=None,remote=None,limit=500,token=None,group=None,
