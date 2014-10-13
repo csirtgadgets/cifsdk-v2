@@ -7,6 +7,7 @@ import pprint
 pp = pprint.PrettyPrinter()
 
 REMOTE ='https://localhost'
+LIMIT = 5000
 
 class Client(object):
 
@@ -28,32 +29,19 @@ class Client(object):
         self.session.headers["Accept"] = 'application/vnd.cif.v' + cif.sdk.__api_version__ + 'json'
         self.session.headers['User-Agent'] = 'cif-sdk-python/' + cif.sdk.__version__
     
-    def search(self,query=None,remote=None,limit=500,token=None,group=None,
-               nolog=False,confidence=None,*args,**kwargs):
-        if not token:
-            token = self.token
-        elif not self.token:
-            raise Exception("Required token for server not provided")
-        if not remote:
-            remote = self.remote
+    def search(self,limit=LIMIT,nolog=None,filters={}):
             
-        uri = self.remote + '/observables?q=' + query + '&token=' + str(token)
-        self.logger.debug(uri)
-         
-        ## TODO - pass these into requests by param
-        if group:
-            uri += '&group=' + group
-        if confidence:
-            uri += '&confidence=' + confidence
-        if limit:
-            uri += '&limit=' + str(limit)
-            
-        if nolog:
-            uri += '&nolog=1'
-       
-        self.logger.debug(uri)
+
+        filters['token'] = self.token
+        filters['limit'] = limit
+        filters['nolog'] = nolog
         
-        body = self.session.get(uri, verify=self.verify_ssl)
+        uri = self.remote + '/observables'
+            
+        self.logger.debug('uri: %s' % uri)
+        self.logger.debug('params: %s', json.dumps(filters))
+        
+        body = self.session.get(uri, params=filters, verify=self.verify_ssl)
         
         self.logger.debug('status code: ' + str(body.status_code))
         if body.status_code > 299:
@@ -63,7 +51,7 @@ class Client(object):
         body = json.loads(body.text)
         return body
 
-    def submit(self, token=None, submit=None, **kwargs):
+    def submit(self, submit=None, **kwargs):
         '''
         '{"observable":"example.com","confidence":"50",":tlp":"amber",
         "provider":"me.com","tags":["zeus","botnet"]}'
@@ -71,12 +59,10 @@ class Client(object):
         if not submit:
             return None
         
-        if not token:
-            token = self.token
-            
-        token = str(token)
+        ##TODO - http://docs.python-requests.org/en/latest/user/quickstart/#more-complicated-post-requests
+        uri = self.remote + '/observables?token=' + self.token
         
-        uri = self.remote + '/observables?token=' + token
+        self.logger.debug('uri: %s' % uri)
          
         body = self.session.post(uri,data=submit,verify=self.verify_ssl)
         self.logger.debug('status code: ' + str(body.status_code))
@@ -90,8 +76,8 @@ class Client(object):
     
     def ping(self):
         t0 = time.time()
-        uri = str(self.remote) + '/ping?token=' + str(self.token)
-        body = self.session.get(uri,verify=self.verify_ssl)
+        uri = str(self.remote) + '/ping'
+        body = self.session.get(uri,params={ 'token': self.token} , verify=self.verify_ssl)
         
         self.logger.debug('status code: ' + str(body.status_code))
         if body.status_code > 299:
