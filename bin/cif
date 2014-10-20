@@ -71,15 +71,17 @@ def main(argv=None): # IGNORE:C0111
         parser = ArgumentParser(description='', formatter_class=RawDescriptionHelpFormatter)
         parser.add_argument("-v", "--verbose", dest="verbose", action="count", help="set verbosity level [default: %(default)s]")
         parser.add_argument('-d', '--debug', dest='debug', action="store_true")
-        parser.add_argument("-q", "--query", dest="query", help="query for observable")
-        parser.add_argument('-T', '--token', dest='token', help="specify token")
-        parser.add_argument('-c', '--confidence', dest="confidence", help="specify confidence")
-        parser.add_argument('-l', '--limit', dest="limit", help="result limit", default=500)
+        parser.add_argument("--search", dest="search", help="search for observable")
+        parser.add_argument("--tags", dest="tags", help="filter for tags")
+        parser.add_argument("--cc", dest="cc", help="filter for countrycode")
+        parser.add_argument('--token', dest='token', help="specify token")
+        parser.add_argument('--confidence', dest="confidence", help="specify confidence")
+        parser.add_argument('--limit', dest="limit", help="result limit", default=500)
         parser.add_argument('--no-verify-ssl', dest="no_verify_ssl", action="store_true", default=False)
-        parser.add_argument('-R', '--remote', dest="remote", help="remote api location (eg: https://example.com)")
-        parser.add_argument('-t', '--timeout', dest="timeout", help='connection timeout [default: %(default)s]', default="300")
+        parser.add_argument('--remote', dest="remote", help="remote api location (eg: https://example.com)")
+        parser.add_argument('--timeout', dest="timeout", help='connection timeout [default: %(default)s]', default="300")
         parser.add_argument('-C', '--config', dest="config", help="configuration file [default: %(default)s]", default=os.path.expanduser("~/.cif") )
-        parser.add_argument('-p', '--ping', dest="ping", action="store_true", help="ping")
+        parser.add_argument('--ping', dest="ping", action="store_true", help="ping")
         parser.add_argument('--submit', help="submit json string")
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
         parser.add_argument('-n', '--nolog', help='do not log the search', default=False, action="store_true")
@@ -114,8 +116,20 @@ def main(argv=None): # IGNORE:C0111
                 if not options.get(k):
                     options[k] = config[k]
         
-        if(options.get('query')):
-            ret = Client(**options).search(**options)
+        if(options.get('search') or options.get('tags') or options.get('cc')):
+            filters = {}
+            if options.get('search'):
+                filters['observable'] = options['search']
+            if options.get('cc'):
+                filters['cc'] = options['cc']
+            
+            if options.get('tags'):
+                filters['tags'] = options['tags']
+                
+            if options.get('confidence'):
+                filters['confidence'] = options['confidence']
+                
+            ret = Client(**options).search(limit=options['limit'],nolog=options['nolog'],filters=filters)
             make_table(ret)
         elif(options.get('ping')):
             for num in range(0,4):
