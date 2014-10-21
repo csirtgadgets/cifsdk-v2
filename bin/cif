@@ -20,6 +20,7 @@ __all__ = []
 __version__ = cif.sdk.__version__
 __date__ = '2014-05-19'
 __updated__ = '2014-05-19'
+__max_field_size__ = 30
 
 class CLIError(Exception):
     '''Generic exception to raise and log different fatal errors.'''
@@ -33,9 +34,7 @@ class CLIError(Exception):
 
 def make_table(r):
     ##TODO factory this out with snort rule, etc
-    cols = ['id','provider','tlp','group','observable','confidence',
-            'firsttime','lasttime','reporttime','altid','altid_tlp',
-            'tags']
+    cols = ['tlp','group','lasttime','observable','cc','confidence','tags','rdata','provider']
     
     t = PrettyTable(cols)
     t.align['provider'] = 'l'
@@ -45,9 +44,11 @@ def make_table(r):
     for obs in r:
         r = []
         for c in cols:
-            y = obs.get(c)
+            y = obs.get(c) or ''
             if type(y) is list:
                 y = ','.join(y)
+            y = str(y)
+            y = (y[:__max_field_size__] + '..') if len(y) > __max_field_size__ else y
             r.append(y)
         t.add_row(r)
     print t
@@ -72,19 +73,24 @@ def main(argv=None): # IGNORE:C0111
         parser.add_argument("-v", "--verbose", dest="verbose", action="count", help="set verbosity level [default: %(default)s]")
         parser.add_argument('-d', '--debug', dest='debug', action="store_true")
         parser.add_argument("--search", dest="search", help="search for observable")
+        parser.add_argument('--firsttime', dest='firsttime', help='firsttime or later')
+        parser.add_argument('--lasttime', dest='lasttime', help='lasttime or earlier')
         parser.add_argument("--tags", dest="tags", help="filter for tags")
+        parser.add_argument('--otype', dest='otype', help='filter by otype')
         parser.add_argument("--cc", dest="cc", help="filter for countrycode")
         parser.add_argument('--token', dest='token', help="specify token")
         parser.add_argument('--confidence', dest="confidence", help="specify confidence")
+        parser.add_argument('--rdata',dest='rdata', help='filter by rdata')
         parser.add_argument('--limit', dest="limit", help="result limit", default=500)
         parser.add_argument('--no-verify-ssl', dest="no_verify_ssl", action="store_true", default=False)
         parser.add_argument('--remote', dest="remote", help="remote api location (eg: https://example.com)")
         parser.add_argument('--timeout', dest="timeout", help='connection timeout [default: %(default)s]', default="300")
         parser.add_argument('-C', '--config', dest="config", help="configuration file [default: %(default)s]", default=os.path.expanduser("~/.cif") )
         parser.add_argument('--ping', dest="ping", action="store_true", help="ping")
+        parser.add_argument('--sort',dest='sort',help='sort output ASC by key')
         parser.add_argument('--submit', help="submit json string")
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
-        parser.add_argument('-n', '--nolog', help='do not log the search', default=False, action="store_true")
+        parser.add_argument('-n', '--nolog', help='do not log the search', default=None, action="store_true")
         
         # Process arguments
         args = parser.parse_args()
@@ -116,7 +122,7 @@ def main(argv=None): # IGNORE:C0111
                 if not options.get(k):
                     options[k] = config[k]
         
-        if(options.get('search') or options.get('tags') or options.get('cc')):
+        if(options.get('search') or options.get('tags') or options.get('cc') or options.get('rdata')):
             filters = {}
             if options.get('search'):
                 filters['observable'] = options['search']
@@ -129,7 +135,22 @@ def main(argv=None): # IGNORE:C0111
             if options.get('confidence'):
                 filters['confidence'] = options['confidence']
                 
-            ret = Client(**options).search(limit=options['limit'],nolog=options['nolog'],filters=filters)
+            if options.get('firsttime'):
+                filters['firsttime'] = options['firsttime']
+            
+            if options.get('lasttime'):
+                filters['lasttime'] = options['lasttime']
+                
+            if options.get('otype'):
+                filters['otype'] = options['otype']
+            
+            if options.get('rdata'):
+                filters['rdata'] = options['rdata']
+            
+            if options.get('nolog'):
+                options['nolog'] = 1
+                
+            ret = Client(**options).search(limit=options['limit'],nolog=options['nolog'],filters=filters,sort=options.get('sort'))
             make_table(ret)
         elif(options.get('ping')):
             for num in range(0,4):
