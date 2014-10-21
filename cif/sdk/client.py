@@ -29,7 +29,7 @@ class Client(object):
         self.session.headers["Accept"] = 'application/vnd.cif.v' + cif.sdk.__api_version__ + 'json'
         self.session.headers['User-Agent'] = 'cif-sdk-python/' + cif.sdk.__version__
     
-    def search(self,limit=LIMIT,nolog=None,filters={}):
+    def search(self,limit=LIMIT,nolog=None,filters={},sort='lasttime'):
             
 
         filters['token'] = self.token
@@ -49,6 +49,7 @@ class Client(object):
             return 'request failed: %s' % str(body.status_code)
         
         body = json.loads(body.text)
+        body = sorted(body, key=lambda o: o[sort])
         return body
 
     def submit(self, submit=None, **kwargs):
