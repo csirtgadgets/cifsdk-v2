@@ -72,7 +72,7 @@ def main(argv=None): # IGNORE:C0111
         parser = ArgumentParser(description='', formatter_class=RawDescriptionHelpFormatter)
         parser.add_argument("-v", "--verbose", dest="verbose", action="count", help="set verbosity level [default: %(default)s]")
         parser.add_argument('-d', '--debug', dest='debug', action="store_true")
-        parser.add_argument("--search", dest="search", help="search for observable")
+        parser.add_argument('-q',"--search", dest="search", help="search for observable")
         parser.add_argument('--firsttime', dest='firsttime', help='firsttime or later')
         parser.add_argument('--lasttime', dest='lasttime', help='lasttime or earlier')
         parser.add_argument("--tags", dest="tags", help="filter for tags")
@@ -87,7 +87,7 @@ def main(argv=None): # IGNORE:C0111
         parser.add_argument('--timeout', dest="timeout", help='connection timeout [default: %(default)s]', default="300")
         parser.add_argument('-C', '--config', dest="config", help="configuration file [default: %(default)s]", default=os.path.expanduser("~/.cif") )
         parser.add_argument('--ping', dest="ping", action="store_true", help="ping")
-        parser.add_argument('--sort',dest='sort',help='sort output ASC by key')
+        parser.add_argument('--sort',dest='sort',help='sort output ASC by key',default='lasttime')
         parser.add_argument('--submit', help="submit json string")
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
         parser.add_argument('-n', '--nolog', help='do not log the search', default=None, action="store_true")
@@ -122,7 +122,7 @@ def main(argv=None): # IGNORE:C0111
                 if not options.get(k):
                     options[k] = config[k]
         
-        if(options.get('search') or options.get('tags') or options.get('cc') or options.get('rdata')):
+        if(options.get('search') or options.get('tags') or options.get('cc') or options.get('rdata') or options.get('otype')):
             filters = {}
             if options.get('search'):
                 filters['observable'] = options['search']
