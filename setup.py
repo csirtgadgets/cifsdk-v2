@@ -21,7 +21,8 @@ setup(
       packages = ["cif","cif.sdk","test"],
       install_requires = ["requests>=2.0"
                           "json",
-                          'pyyaml'],
+                          'pyyaml',
+                          'prettytable'],
       scripts=['bin/cif'],
       test_suite = "test"
 )
