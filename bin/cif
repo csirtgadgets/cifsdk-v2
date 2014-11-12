@@ -85,7 +85,7 @@ def main(argv=None): # IGNORE:C0111
         parser.add_argument('--no-verify-ssl', dest="no_verify_ssl", action="store_true", default=False)
         parser.add_argument('--remote', dest="remote", help="remote api location (eg: https://example.com)")
         parser.add_argument('--timeout', dest="timeout", help='connection timeout [default: %(default)s]', default="300")
-        parser.add_argument('-C', '--config', dest="config", help="configuration file [default: %(default)s]", default=os.path.expanduser("~/.cif") )
+        parser.add_argument('-C', '--config', dest="config", help="configuration file [default: %(default)s]", default=os.path.expanduser("~/.cif.yml") )
         parser.add_argument('--ping', dest="ping", action="store_true", help="ping")
         parser.add_argument('--sort',dest='sort',help='sort output ASC by key',default='lasttime')
         parser.add_argument('--submit', help="submit json string")
