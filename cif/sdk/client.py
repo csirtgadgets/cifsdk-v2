@@ -28,11 +28,10 @@ class Client(object):
         self.session = requests.session()
         self.session.headers["Accept"] = 'application/vnd.cif.v' + cif.sdk.__api_version__ + 'json'
         self.session.headers['User-Agent'] = 'cif-sdk-python/' + cif.sdk.__version__
+        self.session.headers['Authorization'] = 'Token token=' + self.token
+        self.session.headers['Content-Type'] = 'application/json'
     
     def search(self,limit=LIMIT,nolog=None,filters={},sort='lasttime'):
-            
-
-        filters['token'] = self.token
         filters['limit'] = limit
         filters['nolog'] = nolog
         
@@ -61,7 +60,7 @@ class Client(object):
             return None
         
         ##TODO - http://docs.python-requests.org/en/latest/user/quickstart/#more-complicated-post-requests
-        uri = self.remote + '/observables?token=' + self.token
+        uri = self.remote + '/observables'
         
         self.logger.debug('uri: %s' % uri)
          
@@ -78,7 +77,7 @@ class Client(object):
     def ping(self):
         t0 = time.time()
         uri = str(self.remote) + '/ping'
-        body = self.session.get(uri,params={ 'token': self.token} , verify=self.verify_ssl)
+        body = self.session.get(uri,params={}, verify=self.verify_ssl)
         
         self.logger.debug('status code: ' + str(body.status_code))
         if body.status_code > 299:
