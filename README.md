@@ -14,29 +14,37 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
   python setup.py test
   python setup.py install
   ```
-  
+
 # Examples
 ## Client
+### Config
+  ```yaml
+  # ~/.cif.yml
+  client:
+    remote: https://localhost
+    token: 1234
+  ```
+### Running
   ```bash
   $ cif --token 1234 --remote 'https://localhost' -q example.com
   ```
-  
+
 ## API
 ### Search
   ```python
   from cif.sdk.client import Client
   from prettytable import PrettyTable
-  
+
   def make_table(r):
     cols = ['id','provider','tlp','group','observable','confidence',
             'firsttime','lasttime','reporttime','altid','altid_tlp',
             'tags']
-    
+
     t = PrettyTable(cols)
     t.align['provider'] = 'l'
     if type(r) is not list:
         r = [r]
-    
+
     for obs in r:
         r = []
         for c in cols:
@@ -46,11 +54,11 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
             r.append(y)
         t.add_row(r)
     print t
-  
+
   cli = Client(token=1234,
-               remote='https://localhost2:8443',
+               remote='https://localhost',
                noverifyssl=1)
-  
+
   ret = cli.search(query='example.com')
   make_table(ret)
   ```
@@ -58,7 +66,7 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
   ```python
   from cif.sdk.client import Client
   ...
-  
+
   ret = cli.ping()
   print "roundtrip: %s ms" % ret
   ```
