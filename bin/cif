@@ -34,7 +34,7 @@ class CLIError(Exception):
 
 def make_table(r):
     ##TODO factory this out with snort rule, etc
-    cols = ['tlp','group','lasttime','observable','cc','confidence','tags','rdata','provider']
+    cols = ['tlp','group','reporttime','observable','cc','confidence','tags','rdata','provider']
     
     t = PrettyTable(cols)
     t.align['provider'] = 'l'
@@ -86,8 +86,8 @@ def main(argv=None): # IGNORE:C0111
         parser.add_argument('--remote', dest="remote", help="remote api location (eg: https://example.com)")
         parser.add_argument('--timeout', dest="timeout", help='connection timeout [default: %(default)s]', default="300")
         parser.add_argument('-C', '--config', dest="config", help="configuration file [default: %(default)s]", default=os.path.expanduser("~/.cif.yml") )
-        parser.add_argument('--ping', dest="ping", action="store_true", help="ping")
-        parser.add_argument('--sort',dest='sort',help='sort output ASC by key',default='lasttime')
+        parser.add_argument('-p','--ping', dest="ping", action="store_true", help="ping")
+        parser.add_argument('--sort',dest='sort',help='sort output ASC by key',default='reporttime')
         parser.add_argument('--submit', help="submit json string")
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
         parser.add_argument('-n', '--nolog', help='do not log the search', default=None, action="store_true")
