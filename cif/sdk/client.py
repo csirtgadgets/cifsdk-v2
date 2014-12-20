@@ -39,15 +39,18 @@ class Client(object):
             
         self.logger.debug('uri: %s' % uri)
         self.logger.debug('params: %s', json.dumps(filters))
-        
+
+        self.logger.info('searching...')
         body = self.session.get(uri, params=filters, verify=self.verify_ssl)
-        
         self.logger.debug('status code: ' + str(body.status_code))
+
         if body.status_code > 299:
             self.logger.error('request failed: %s' % str(body.status_code))
             return 'request failed: %s' % str(body.status_code)
-        
+
+        self.logger.info('deoding %i bytes...' % len(body.text))
         body = json.loads(body.text)
+        self.logger.info('sorting...')
         body = sorted(body, key=lambda o: o[sort])
         return body
 

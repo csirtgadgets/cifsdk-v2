@@ -2,7 +2,8 @@
 # encoding: utf-8
 
 import sys
-import os, os.path
+import os
+import os.path
 import cif.sdk
 from cif.sdk.client import Client
 from prettytable import PrettyTable
@@ -75,6 +76,8 @@ def main(argv=None): # IGNORE:C0111
         parser.add_argument('-q',"--search", dest="search", help="search for observable")
         parser.add_argument('--firsttime', dest='firsttime', help='firsttime or later')
         parser.add_argument('--lasttime', dest='lasttime', help='lasttime or earlier')
+        parser.add_argument('--reporttime',dest='reporttime', help='TODO')
+        parser.add_argument('--reporttimeend',dest='reporttimeend',help='TODO')
         parser.add_argument("--tags", dest="tags", help="filter for tags")
         parser.add_argument('--otype', dest='otype', help='filter by otype')
         parser.add_argument("--cc", dest="cc", help="filter for countrycode")
@@ -140,6 +143,12 @@ def main(argv=None): # IGNORE:C0111
             
             if options.get('lasttime'):
                 filters['lasttime'] = options['lasttime']
+
+            if options.get('reporttime'):
+                filters['reporttime'] = options['reporttime']
+
+            if options.get('reporttimeend'):
+                filters['reporttimeend'] = options['reporttimeend']
                 
             if options.get('otype'):
                 filters['otype'] = options['otype']
