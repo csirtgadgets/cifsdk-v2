@@ -1,4 +1,4 @@
-import json
+import ujson as json
 import requests
 import time
 import logging
@@ -31,7 +31,7 @@ class Client(object):
         self.session.headers['Authorization'] = 'Token token=' + self.token
         self.session.headers['Content-Type'] = 'application/json'
     
-    def search(self,limit=LIMIT,nolog=None,filters={},sort='lasttime'):
+    def search(self,decode=True,limit=LIMIT,nolog=None,filters={},sort='lasttime'):
         filters['limit'] = limit
         filters['nolog'] = nolog
         
@@ -41,18 +41,29 @@ class Client(object):
         self.logger.debug('params: %s', json.dumps(filters))
 
         self.logger.info('searching...')
-        body = self.session.get(uri, params=filters, verify=self.verify_ssl)
+
+        try:
+            body = self.session.get(uri, params=filters, verify=self.verify_ssl)
+        except requests.exceptions.ConnectionError:
+            self.logger.error('connection error')
+            return None
+
         self.logger.debug('status code: ' + str(body.status_code))
 
         if body.status_code > 299:
             self.logger.error('request failed: %s' % str(body.status_code))
             return 'request failed: %s' % str(body.status_code)
 
-        self.logger.info('deoding %i bytes...' % len(body.text))
-        body = json.loads(body.text)
-        self.logger.info('sorting...')
-        body = sorted(body, key=lambda o: o[sort])
-        return body
+        ret = body.content
+        if decode:
+            self.logger.info('decoding...')
+            ret = json.loads(ret.content)
+
+            self.logger.info('sorting...')
+            ret = sorted(ret, key=lambda o: o[sort])
+
+        self.logger.debug('returning..')
+        return ret
 
     def submit(self, submit=None, **kwargs):
         '''
@@ -66,7 +77,7 @@ class Client(object):
         uri = self.remote + '/observables'
         
         self.logger.debug('uri: %s' % uri)
-         
+
         body = self.session.post(uri,data=submit,verify=self.verify_ssl)
         self.logger.debug('status code: ' + str(body.status_code))
         if body.status_code > 299:
@@ -74,7 +85,7 @@ class Client(object):
             self.logger.error(json.loads(body.text).get('message'))
             return None
         
-        body = json.loads(body.text)
+        body = json.endcode(body.text)
         return body
     
     def ping(self):
