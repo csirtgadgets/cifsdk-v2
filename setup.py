@@ -22,7 +22,8 @@ setup(
       install_requires = ["requests>=2.0"
                           "json",
                           'pyyaml',
-                          'prettytable'],
+                          'prettytable',
+                          'ujson'],
       scripts=['bin/cif'],
       test_suite = "test"
 )

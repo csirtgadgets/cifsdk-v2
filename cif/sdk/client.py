@@ -57,7 +57,7 @@ class Client(object):
         ret = body.content
         if decode:
             self.logger.info('decoding...')
-            ret = json.loads(ret.content)
+            ret = json.loads(ret)
 
             self.logger.info('sorting...')
             ret = sorted(ret, key=lambda o: o[sort])
