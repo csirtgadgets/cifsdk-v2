@@ -85,7 +85,7 @@ class Client(object):
             self.logger.error(json.loads(body.text).get('message'))
             return None
         
-        body = json.endcode(body.text)
+        body = json.loads(body.text)
         return body
     
     def ping(self):
