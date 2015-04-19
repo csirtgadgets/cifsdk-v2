@@ -1,4 +1,4 @@
-requests>=2.0
+requests>=2.4
 PrettyTable>=0.7.2
 pyyaml
 ujson
