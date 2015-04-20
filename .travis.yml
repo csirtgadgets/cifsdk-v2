@@ -15,4 +15,4 @@ notifications:
 branches:
     only:
         - master
-        - staging
+        - develop
