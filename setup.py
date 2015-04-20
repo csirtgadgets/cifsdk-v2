@@ -28,7 +28,7 @@ setup(
     keywords=['cif', ' security'],
     author="Wes Young",
     author_email="wes@barely3am.com",
-    packages=["cifsdk", "test", "cif.format"],
+    packages=["cifsdk", "test", "cifsdk.format"],
     install_requires=reqs,
     entry_points={
           'console_scripts': [
