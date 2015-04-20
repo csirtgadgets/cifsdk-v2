@@ -16,7 +16,6 @@ except ImportError:
 # re.compile(r'http.?://[a-z,/,\.,\d,\?,=,\-,\+,#,_,&,;,\,,:,@,%,]*', re.IGNORECASE).findall(xxx)
 RE_URL = r'href=[\'"]?([^\'" >]+)'
 REPLACE = ['=\n', "\t", "\r", '\\n']
-REMOTE_DEFAULT = "http://localhost:5000"
 
 from pprint import pprint
 

@@ -25,7 +25,6 @@ from cifsdk.observable import Observable
 from cifsdk.urls import extract_urls
 
 LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s[%(lineno)s] - %(message)s'
-
 REMOTE_DEFAULT = "http://localhost:5000"
 
 
