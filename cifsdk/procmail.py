@@ -119,7 +119,7 @@ def main():
     cli = Client(remote=options["remote"], token=options["token"], no_verify_ssl=options["no_verify_ssl"])
 
     for u in urls:
-        logger.info("submitting: {}".format(u))
+        logger.info("submitting: {0}".format(u))
         raw = html
         if options.get("raw_headers"):
             raw = msg.as_string()
