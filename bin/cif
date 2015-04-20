@@ -11,8 +11,7 @@ import yaml
 import logging
 import traceback
 import select
-import pprint
-pp = pprint.PrettyPrinter()
+from pprint import pprint
 
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
@@ -133,6 +132,12 @@ def main(argv=None): # IGNORE:C0111
             for k in config:
                 if not options.get(k):
                     options[k] = config[k]
+        else:
+            logger.info("{} config does not exist".format(args.config))
+            
+        if not options.get("remote"):
+            logger.critical("missing --remote")
+            raise SystemExit
         
         if(options.get('search') or options.get('tags') or options.get('cc') or options.get('rdata') or options.get(
                 'otype') or options.get('provider') or options.get('asn')):
