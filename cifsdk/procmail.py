@@ -110,7 +110,7 @@ def main():
     if msg.is_multipart():
         msgs = msg.get_payload()
         for i, m in enumerate(msgs[1:]):
-            html = str(m.get_payload())
+            html = str(m.get_payload())     # double check for py2.7
             urls.update(extract_urls(html))
     else:
         html = msg.get_payload()
@@ -134,7 +134,7 @@ def main():
             provider=options["provider"]
         )
         r = cli.submit(submit=str(o))
-        print r
+        logger.info("submitted: {0}".format(r))
 
 
 if __name__ == "__main__":
