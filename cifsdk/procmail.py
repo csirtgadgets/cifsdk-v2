@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 
-try:
-    import re2 as re
-except ImportError:
-    import re
+# http://blog.magiksys.net/parsing-email-using-python-content
+# https://github.com/mailgun/flanker
+# https://pregmatch.org/read/python-procmail
+# http://stackoverflow.com/questions/557906/want-procmail-to-run-a-custom-python-script-everytime-a-new-mail-shows-up
+# http://stackoverflow.com/questions/14676375/pipe-email-from-procmail-to-python-script-that-parses-body-and-saves-as-text-fil
+# http://blog.magiksys.net/parsing-email-using-python-content
+# https://github.com/andris9/mailparser
+
+
 
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
@@ -12,48 +17,16 @@ import logging
 import os.path
 import textwrap
 import sys
-from cifsdk.client import Client
-from cifsdk.observable import Observable
-
 from pprint import pprint
 import yaml
 
-
-# http://stackoverflow.com/questions/499345/regular-expression-to-extract-url-from-an-html-link
-# http://blog.magiksys.net/parsing-email-using-python-content
-# https://github.com/mailgun/flanker
-# https://pregmatch.org/read/python-procmail
-# http://stackoverflow.com/questions/557906/want-procmail-to-run-a-custom-python-script-everytime-a-new-mail-shows-up
-# http://stackoverflow.com/questions/14676375/pipe-email-from-procmail-to-python-script-that-parses-body-and-saves-as-text-fil
-
-# read
-# http://blog.magiksys.net/parsing-email-using-python-content
-# https://github.com/andris9/mailparser
-
-# RE for URL extraction:
-# http://daringfireball.net/2010/07/improved_regex_for_matching_urls
-# http://daringfireball.net/misc/2010/07/url-matching-regex-test-data.text
-# https://gist.github.com/uogbuji/705383
-# GRUBER_URLINTEXT_PAT = re.compile(ur'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([
-# ^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?\xab\xbb\u201c\u201d\u2018\u2019]))')
+from cifsdk.client import Client
+from cifsdk.observable import Observable
+from cifsdk.urls import extract_urls
 
 LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s[%(lineno)s] - %(message)s'
 
-# re.compile(r'http.?://[a-z,/,\.,\d,\?,=,\-,\+,#,_,&,;,\,,:,@,%,]*', re.IGNORECASE).findall(xxx)
-RE_URL = r'href=[\'"]?([^\'" >]+)'
-REPLACE = ['=\n', "\t", "\r", '\\n']
 REMOTE_DEFAULT = "http://localhost:5000"
-
-
-def extract_urls(msg):
-    msg = msg.replace("=3D", '=')
-    for x in REPLACE:
-        msg = msg.replace(x, '')
-
-    urls = re.findall(RE_URL, msg)
-
-    links = {u.lower() for u in urls}
-    return links
 
 
 def main():
