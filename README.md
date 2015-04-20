@@ -27,35 +27,15 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
 ## API
 ### Search
   ```python
-  from cif.sdk.client import Client
-  from prettytable import PrettyTable
-
-  def make_table(r):
-    cols = ['id','provider','tlp','group','observable','confidence',
-            'firsttime','lasttime','reporttime','altid','altid_tlp',
-            'tags']
-
-    t = PrettyTable(cols)
-    t.align['provider'] = 'l'
-    if type(r) is not list:
-        r = [r]
-
-    for obs in r:
-        r = []
-        for c in cols:
-            y = obs.get(c)
-            if type(y) is list:
-                y = ','.join(y)
-            r.append(y)
-        t.add_row(r)
-    print t
+  from cifsdk.client import Client
+  from cifsdk.format import Table
 
   cli = Client(token=1234,
                remote='https://localhost',
                noverifyssl=1)
 
   ret = cli.search(query='example.com')
-  make_table(ret)
+  print Table(ret)
   ```
 ### Ping
   ```python
@@ -68,7 +48,7 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
 
 # Support and Documentation
 
-You can also look for information at the [GitHub repo](https://github.com/csirtgadgets/py-cif-sdk).
+You can also look for information at the [GitHub repo](https://github.com/csirtgadgets/py-cifsdk).
 
 # License and Copyright
 
