@@ -42,9 +42,9 @@ class Client(object):
             self.verify_ssl = True
 
         self.session = requests.session()
-        self.session.headers["Accept"] = "application/vnd.cif.v{}+json".format(API_VERSION)
-        self.session.headers['User-Agent'] = "py-cifsdk/{}".format(VERSION)
-        self.session.headers['Authorization'] = "Token token={}".format(self.token)
+        self.session.headers["Accept"] = "application/vnd.cif.v{0}+json".format(API_VERSION)
+        self.session.headers['User-Agent'] = "py-cifsdk/{0}".format(VERSION)
+        self.session.headers['Authorization'] = "Token token={0}".format(self.token)
         self.session.headers['Content-Type'] = 'application/json'
     
     def search(self,decode=True, limit=LIMIT, nolog=None,filters={}, sort='lasttime'):
