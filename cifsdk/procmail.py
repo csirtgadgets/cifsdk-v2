@@ -106,10 +106,16 @@ def main():
         msg = sys.stdin.read()
         msg = email.message_from_string(msg)
 
-    html = msg.get_payload()
-    urls = extract_urls(html)
+    urls = set()
+    if msg.is_multipart():
+        msgs = msg.get_payload()
+        for i, m in enumerate(msgs[1:]):
+            html = m.get_payload(i).as_string()
+            urls.update(extract_urls(html))
+    else:
+        html = msg.get_payload()
+        urls.update(extract_urls(html))
 
-    logger.debug(pprint(urls))
     cli = Client(remote=options["remote"], token=options["token"], no_verify_ssl=options["no_verify_ssl"])
 
     for u in urls:
@@ -117,6 +123,7 @@ def main():
         raw = html
         if options.get("raw_headers"):
             raw = msg.as_string()
+
         o = Observable(
             observable=u,
             confidence=options["confidence"],

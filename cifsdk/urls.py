@@ -18,6 +18,7 @@ RE_URL = r'href=[\'"]?([^\'" >]+)'
 REPLACE = ['=\n', "\t", "\r", '\\n']
 REMOTE_DEFAULT = "http://localhost:5000"
 
+from pprint import pprint
 
 def extract_urls(msg):
     msg = msg.replace("=3D", '=')
@@ -25,6 +26,9 @@ def extract_urls(msg):
         msg = msg.replace(x, '')
 
     urls = re.findall(RE_URL, msg)
+    links = set()
+    for u in urls:
+        u = u.rstrip("/")
+        links.add(u)
 
-    links = {u.lower() for u in urls}
     return links
