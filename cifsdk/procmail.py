@@ -110,7 +110,7 @@ def main():
     if msg.is_multipart():
         msgs = msg.get_payload()
         for i, m in enumerate(msgs[1:]):
-            html = m.get_payload(i).as_string()
+            html = str(m.get_payload())
             urls.update(extract_urls(html))
     else:
         html = msg.get_payload()
