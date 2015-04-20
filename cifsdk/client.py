@@ -40,7 +40,7 @@ class Client(object):
             self.verify_ssl = False
         else:
             self.verify_ssl = True
-        
+
         self.session = requests.session()
         self.session.headers["Accept"] = "application/vnd.cif.v{}+json".format(API_VERSION)
         self.session.headers['User-Agent'] = "py-cifsdk/{}".format(VERSION)
@@ -88,7 +88,12 @@ class Client(object):
         '''
         if not submit:
             return None
-        
+
+        if not isinstance(submit, basestring):
+            if type(submit) != list:
+                submit = [submit]
+            submit = json.dumps(submit)
+
         ##TODO - http://docs.python-requests.org/en/latest/user/quickstart/#more-complicated-post-requests
         uri = self.remote + '/observables'
         
