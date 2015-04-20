@@ -2,7 +2,7 @@ import unittest
 from cifsdk.client import Client
 
 
-class TestClient(unittest.TestCase):
+class TestSimple(unittest.TestCase):
 
     def setUp(self):
         self.cli = Client(token=1234,remote='https://localhost2:8443',
