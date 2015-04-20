@@ -1,5 +1,6 @@
 import unittest
-from cif.sdk.client import Client
+from cifsdk.client import Client
+
 
 class TestClient(unittest.TestCase):
 

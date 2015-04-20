@@ -1,2 +1,4 @@
 include *.txt
 include *.md
+include versioneer.py
+include cifsdk/_version.py

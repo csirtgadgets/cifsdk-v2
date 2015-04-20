@@ -1,29 +1,39 @@
 from setuptools import setup
 
-import cif.sdk
+with open('requirements.txt') as f:
+    reqs = f.read().splitlines()
+
+import versioneer
+versioneer.VCS = 'git'
+versioneer.versionfile_source = 'cifsdk/_version.py'
+versioneer.versionfile_build = 'cifsdk/_version.py'
+versioneer.tag_prefix = ''  # tags are like 1.2.0
+versioneer.parentdir_prefix = 'py-cifsdk-'  # dirname like 'myproject-1.2.0'
+
 setup(
-      name="cif-sdk",
-      version=cif.sdk.__version__,
-      description="CIF Python SDK",
-      long_description="CIF Software Development Kit for Python",
-      url="https://github.com/csirtgadgets/py-cif-sdk",
-      license='LGPL3',
-      classifiers=[
-                   "Topic :: System :: Networking",
-                   "Environment :: Other Environment",
-                   "Intended Audience :: Developers",
-                   "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
-                   "Programming Language :: Python",
-                   ],
-      keywords=['cif','security','intelligence'],
-      author="Wes Young",
-      author_email="wes@barely3am.com",
-      packages = ["cif","cif.sdk","test"],
-      install_requires = ["requests>=2.0"
-                          "json",
-                          'pyyaml',
-                          'prettytable',
-                          'ujson'],
-      scripts=['bin/cif'],
-      test_suite = "test"
+    name="py-cifsdk",
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
+    description="CIF Python SDK",
+    long_description="CIF Software Development Kit for Python",
+    url="https://github.com/csirtgadgets/py-cif-sdk",
+    license='LGPL3',
+    classifiers=[
+       "Topic :: System :: Networking",
+       "Environment :: Other Environment",
+       "Intended Audience :: Developers",
+       "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+       "Programming Language :: Python",
+       ],
+    keywords=['cif', ' security'],
+    author="Wes Young",
+    author_email="wes@barely3am.com",
+    packages = ["cifsdk", "test"],
+    install_requires=reqs,
+    entry_points={
+          'console_scripts': [
+              'cif=cifsdk.client:main'
+              ]
+      },
+    test_suite="test"
 )

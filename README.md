@@ -1,18 +1,13 @@
 # CIF Software Development Kit for Python
 The CIF  Software Development Kit (SDK) for Python contains library code and examples designed to enable developers to build applications using CIF.
 
-[![Build Status](https://travis-ci.org/csirtgadgets/py-cif-sdk.png?branch=master)](https://travis-ci.org/csirtgadgets/py-cif-sdk)
+[![Build Status](https://travis-ci.org/csirtgadgets/py-cif-sdk.png?branch=master)](https://travis-ci.org/csirtgadgets/py-cifsdk)
 
 # Installation
 ## Ubuntu
   ```bash
-  sudo apt-get install -y python-dev python-pip git
-  git clone https://github.com/csirtgadgets/py-cif-sdk.git -b master
-  cd py-cif-sdk
-  pip install -r requirements.txt
-  python setup.py build
-  python setup.py test
-  python setup.py install
+  $ sudo apt-get install -y python-dev python-pip git
+  $ pip install git+ https://github.com/csirtgadgets/py-cifsdk
   ```
 
 # Examples
@@ -64,7 +59,7 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
   ```
 ### Ping
   ```python
-  from cif.sdk.client import Client
+  from cifsdk.client import Client
   ...
 
   ret = cli.ping()

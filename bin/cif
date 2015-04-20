@@ -4,8 +4,7 @@
 import sys
 import os
 import os.path
-import cif.sdk
-from cif.sdk.client import Client
+from cifsdk.client import Client
 from prettytable import PrettyTable
 import yaml
 import logging
@@ -17,20 +16,11 @@ from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 
 __all__ = []
-__version__ = cif.sdk.__version__
+__version__ = cifsdk.__version__
 __date__ = '2014-05-19'
 __updated__ = '2014-05-19'
 __max_field_size__ = 30
 
-class CLIError(Exception):
-    '''Generic exception to raise and log different fatal errors.'''
-    def __init__(self, msg):
-        super(CLIError).__init__(type(self))
-        self.msg = "E: %s" % msg
-    def __str__(self):
-        return self.msg
-    def __unicode__(self):
-        return self.msg
 
 def make_table(r):
     ##TODO factory this out with snort rule, etc
@@ -134,7 +124,7 @@ def main(argv=None): # IGNORE:C0111
                     options[k] = config[k]
         else:
             logger.info("{} config does not exist".format(args.config))
-            
+
         if not options.get("remote"):
             logger.critical("missing --remote")
             raise SystemExit
