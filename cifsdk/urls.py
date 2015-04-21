@@ -14,17 +14,23 @@ except ImportError:
 # ^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?\xab\xbb\u201c\u201d\u2018\u2019]))')
 
 # re.compile(r'http.?://[a-z,/,\.,\d,\?,=,\-,\+,#,_,&,;,\,,:,@,%,]*', re.IGNORECASE).findall(xxx)
-RE_URL = r'href=[\'"]?([^\'" >]+)'
+RE_URL_HTML = r'href=[\'"]?([^\'" >]+)'
+RE_URL_PLAIN = r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?\xab\xbb\u201c\u201d\u2018\u2019]))'
 REPLACE = ['=\n', "\t", "\r", '\\n']
 
 from pprint import pprint
 
-def extract_urls(msg):
-    msg = msg.replace("=3D", '=')
-    for x in REPLACE:
-        msg = msg.replace(x, '')
 
-    urls = re.findall(RE_URL, msg)
+def extract_urls(msg, html=False):
+    if html:
+        msg = msg.replace("=3D", '=')
+        for x in REPLACE:
+            msg = msg.replace(x, '')
+
+        urls = re.findall(RE_URL_HTML, msg)
+    else:
+        urls = re.findall(RE_URL_PLAIN, msg)
+
     links = set()
     for u in urls:
         u = u.rstrip("/")

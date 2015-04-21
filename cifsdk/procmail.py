@@ -106,14 +106,19 @@ def main():
         msg = email.message_from_string(msg)
 
     urls = set()
+    # plain text vs html
+
+    #print msg.get_content_type()
     if msg.is_multipart():
         msgs = msg.get_payload()
         for i, m in enumerate(msgs[1:]):
-            html = str(m.get_payload(i))
+            html = str(m.get_payload())  ## TODO
             urls.update(extract_urls(html))
     else:
-        html = msg.get_payload()
-        urls.update(extract_urls(html))
+        content = msg.get_payload()
+        if not msg.get_content_type.startswith("text/plain"):
+            html = True
+        urls.update(extract_urls(content, html=html))
 
     pprint(urls)
 
