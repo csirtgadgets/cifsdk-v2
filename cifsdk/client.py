@@ -28,7 +28,7 @@ LIMIT = 5000
 class Client(object):
 
     def __init__(self, remote=REMOTE, logger=logging.getLogger(__name__), 
-                 token=None, proxy=None, timeout=300, no_verify_ssl=False, **kwargs):
+                 token=None, proxy=None, timeout=300, no_verify_ssl=False, nowait=False):
         
         self.logger = logger
         self.remote = remote
@@ -46,8 +46,10 @@ class Client(object):
         self.session.headers['User-Agent'] = "py-cifsdk/{0}".format(VERSION)
         self.session.headers['Authorization'] = "Token token={0}".format(self.token)
         self.session.headers['Content-Type'] = 'application/json'
+
+        self.nowait = nowait
     
-    def search(self,decode=True, limit=LIMIT, nolog=None,filters={}, sort='lasttime'):
+    def search(self,decode=True, limit=LIMIT, nolog=None, filters={}, sort='lasttime'):
         filters['limit'] = limit
         filters['nolog'] = nolog
         
@@ -96,6 +98,9 @@ class Client(object):
 
         ##TODO - http://docs.python-requests.org/en/latest/user/quickstart/#more-complicated-post-requests
         uri = self.remote + '/observables'
+
+        if self.nowait:
+            uri = "{0}?nowait=1".format(uri)
         
         self.logger.debug('uri: %s' % uri)
 
