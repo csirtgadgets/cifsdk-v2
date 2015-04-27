@@ -27,10 +27,9 @@ LIMIT = 5000
 
 class Client(object):
 
-    def __init__(self, remote=REMOTE, logger=logging.getLogger(__name__), 
-                 token=None, proxy=None, timeout=300, no_verify_ssl=False, nowait=False):
+    def __init__(self, token, remote=REMOTE, proxy=None, timeout=300, no_verify_ssl=False, nowait=False):
         
-        self.logger = logger
+        self.logger = logging.getLogger(__name__)
         self.remote = remote
         self.token = str(token)
         self.proxy = proxy
@@ -83,18 +82,18 @@ class Client(object):
         self.logger.debug('returning..')
         return ret
 
-    def submit(self, submit=None, **kwargs):
-        '''
+    def submit(self, data):
+        """
         '{"observable":"example.com","confidence":"50",":tlp":"amber",
         "provider":"me.com","tags":["zeus","botnet"]}'
-        '''
-        if not submit:
-            return None
+        """
+        if not data:
+            raise RuntimeError
 
-        if not isinstance(submit, basestring):
-            if type(submit) != list:
-                submit = [submit]
-            submit = json.dumps(submit)
+        if not isinstance(data, basestring):
+            if type(data) != list:
+                data = [data]
+            data = json.dumps(data)
 
         ##TODO - http://docs.python-requests.org/en/latest/user/quickstart/#more-complicated-post-requests
         uri = self.remote + '/observables'
@@ -104,7 +103,7 @@ class Client(object):
         
         self.logger.debug('uri: %s' % uri)
 
-        body = self.session.post(uri,data=submit,verify=self.verify_ssl)
+        body = self.session.post(uri, data=data, verify=self.verify_ssl)
         self.logger.debug('status code: ' + str(body.status_code))
         if body.status_code > 299:
             self.logger.error('request failed: %s' % str(body.status_code))
@@ -117,7 +116,7 @@ class Client(object):
     def ping(self):
         t0 = time.time()
         uri = str(self.remote) + '/ping'
-        body = self.session.get(uri,params={}, verify=self.verify_ssl)
+        body = self.session.get(uri, params={}, verify=self.verify_ssl)
         
         self.logger.debug('status code: ' + str(body.status_code))
         if body.status_code > 299:
@@ -140,33 +139,38 @@ def main():
         prog='cif'
     )
 
-
+    # options
     p.add_argument("-v", "--verbose", dest="verbose", action="count", help="set verbosity level [default: %(default)s]")
     p.add_argument('-d', '--debug', dest='debug', action="store_true")
     p.add_argument('-V', '--version', action='version', version=VERSION)
+    p.add_argument('--no-verify-ssl', action="store_true", default=False)
+    p.add_argument('--remote',  help="remote api location (eg: https://example.com)")
+    p.add_argument('--timeout',  help='connection timeout [default: %(default)s]', default="300")
+    p.add_argument('-C', '--config',  help="configuration file [default: %(default)s]", default=os.path.expanduser("~/.cif.yml") )
 
-    p.add_argument('-q',"--search", dest="search", help="search for observable")
-    p.add_argument('--firsttime', dest='firsttime', help='firsttime or later')
-    p.add_argument('--lasttime', dest='lasttime', help='lasttime or earlier')
-    p.add_argument('--reporttime',dest='reporttime', help='TODO')
-    p.add_argument('--reporttimeend',dest='reporttimeend',help='TODO')
-    p.add_argument("--tags", dest="tags", help="filter for tags")
-    p.add_argument('--otype', dest='otype', help='filter by otype')
-    p.add_argument("--cc", dest="cc", help="filter for countrycode")
-    p.add_argument('--token', dest='token', help="specify token")
-    p.add_argument('--confidence', dest="confidence", help="specify confidence")
-    p.add_argument('--rdata',dest='rdata', help='filter by rdata')
-    p.add_argument('--limit', dest="limit", help="result limit", default=500)
-    p.add_argument('--no-verify-ssl', dest="no_verify_ssl", action="store_true", default=False)
-    p.add_argument('--remote', dest="remote", help="remote api location (eg: https://example.com)")
-    p.add_argument('--timeout', dest="timeout", help='connection timeout [default: %(default)s]', default="300")
-    p.add_argument('-C', '--config', dest="config", help="configuration file [default: %(default)s]", default=os.path.expanduser("~/.cif.yml") )
-    p.add_argument('-p','--ping', dest="ping", action="store_true", help="ping")
-    p.add_argument('--sort',dest='sort',help='sort output ASC by key',default='reporttime')
+    p.add_argument('--sort', help='sort output ASC by key', default='reporttime')
+
+    # actions
+    p.add_argument('-p', '--ping', action="store_true", help="ping")
     p.add_argument('--submit', help="submit json string")
-    p.add_argument('-n', '--nolog', help='do not log the search', default=None, action="store_true")
-    p.add_argument('--provider', dest='provider', help='filter by provider')
 
+    # flags
+    p.add_argument('--limit', help="result limit", default=500)
+    p.add_argument('-n', '--nolog', help='do not log the search', default=None, action="store_true")
+
+    # filters
+    p.add_argument('-q', "--search", help="search for observable")
+    p.add_argument('--firsttime', help='firsttime or later')
+    p.add_argument('--lasttime', help='lasttime or earlier')
+    p.add_argument('--reporttime', help='TODO')
+    p.add_argument('--reporttimeend', help='TODO')
+    p.add_argument("--tags", help="filter for tags")
+    p.add_argument('--otype', help='filter by otype')
+    p.add_argument("--cc", help="filter for countrycode")
+    p.add_argument('--token', help="specify token")
+    p.add_argument('--confidence', help="specify confidence")
+    p.add_argument('--rdata', help='filter by rdata')
+    p.add_argument('--provider', help='filter by provider')
     p.add_argument('--asn', help='filter by asn')
 
     # Process arguments
@@ -204,6 +208,8 @@ def main():
     if not options.get("remote"):
         logger.critical("missing --remote")
         raise SystemExit
+
+    cli = Client(options['token'], remote=options['remote'], proxy=options.get('proxy'))
 
     try:
         if(options.get('search') or options.get('tags') or options.get('cc') or options.get('rdata') or options.get(
@@ -247,16 +253,16 @@ def main():
             if options.get('asn'):
                 filters['asn'] = options['asn']
 
-            ret = Client(**options).search(limit=options['limit'],nolog=options['nolog'],filters=filters,sort=options.get('sort'))
-            print Table(ret)
+            ret = cli.search(limit=options['limit'], nolog=options['nolog'], filters=filters, sort=options.get('sort'))
+            print(Table(ret))
         elif options.get('ping'):
             for num in range(0,4):
-                ret = Client(**options).ping()
+                ret = cli.ping()
                 print "roundtrip: %s ms" % ret
                 select.select([], [], [], 1)
         elif options.get('submit'):
-            ret = Client(**options).submit(**options)
-            print Table(ret)
+            ret = cli.submit(options["submit"])
+            print(Table(ret))
         else:
             logger.warning('operation not supported')
             sys.exit()
