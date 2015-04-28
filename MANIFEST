@@ -4,9 +4,14 @@ README.md
 requirements.txt
 setup.py
 versioneer.py
-bin/cif
 cifsdk/__init__.py
 cifsdk/_version.py
 cifsdk/client.py
+cifsdk/observable.py
+cifsdk/procmail.py
+cifsdk/urls.py
+cifsdk/format/__init__.py
+cifsdk/format/table.py
 test/__init__.py
+test/test_email.py
 test/test_simple.py
