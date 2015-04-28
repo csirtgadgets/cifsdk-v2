@@ -146,7 +146,8 @@ def main():
     p.add_argument('--no-verify-ssl', action="store_true", default=False)
     p.add_argument('--remote',  help="remote api location (eg: https://example.com)")
     p.add_argument('--timeout',  help='connection timeout [default: %(default)s]', default="300")
-    p.add_argument('-C', '--config',  help="configuration file [default: %(default)s]", default=os.path.expanduser("~/.cif.yml") )
+    p.add_argument('-C', '--config',  help="configuration file [default: %(default)s]",
+                   default=os.path.expanduser("~/.cif.yml"))
 
     p.add_argument('--sort', help='sort output ASC by key', default='reporttime')
 
