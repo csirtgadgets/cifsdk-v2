@@ -2,6 +2,7 @@ from cifsdk.format import Plugin
 import csv
 import StringIO
 
+
 class Csv(Plugin):
 
     def __init__(self, *args, **kwargs):
