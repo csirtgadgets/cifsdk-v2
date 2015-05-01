@@ -150,6 +150,7 @@ def main():
                    default=os.path.expanduser("~/.cif.yml"))
 
     p.add_argument('--sort', help='sort output ASC by key', default='reporttime')
+    p.add_argument('--format', help="specify output format [default: %(default)s]", default="table")
 
     # actions
     p.add_argument('-p', '--ping', action="store_true", help="ping")
@@ -255,7 +256,11 @@ def main():
                 filters['asn'] = options['asn']
 
             ret = cli.search(limit=options['limit'], nolog=options['nolog'], filters=filters, sort=options.get('sort'))
-            print(Table(ret))
+            try:
+                print(Table(ret))
+            except AttributeError as e:
+                logger.exception(e)
+            
         elif options.get('ping'):
             for num in range(0,4):
                 ret = cli.ping()

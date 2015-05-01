@@ -10,7 +10,6 @@ class Table(Plugin):
     def __repr__(self):
         t = PrettyTable(self.cols)
         t.align['provider'] = 'l'
-
         for obs in self.data:
             r = []
             for c in self.cols:
