@@ -1,4 +1,4 @@
-from cifsdk.format import Plugin
+from cifsdk.format.plugin import Plugin
 import json
 
 

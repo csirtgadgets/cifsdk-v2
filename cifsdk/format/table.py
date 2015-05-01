@@ -1,5 +1,5 @@
 from prettytable import PrettyTable
-from cifsdk.format import Plugin
+from cifsdk.format.plugin import Plugin
 
 
 class Table(Plugin):

@@ -1,18 +1,18 @@
-COLUMNS = ['reporttime', 'observable', 'cc', 'asn', 'asn_desc', 'confidence', 'tags', 'rdata', 'provider']
-MAX_FIELD_SIZE = 30
 
 
-class Plugin(object):
+from cifsdk.format.cifjson import Json
+from cifsdk.format.cifcsv import Csv
+from cifsdk.format.table import Table
 
-    def __init__(self, data=[], cols=COLUMNS, max_field_size=MAX_FIELD_SIZE):
-        self.cols = cols
-        self.max_field_size = max_field_size
-        self.data = data
-        if self.data:
-            if type(self.data) is not list:
-                self.data = [self.data]
-        else:
-            self.data = []
+plugins = {
+    'json': Json,
+    'table': Table,
+    'csv': Csv
+}
 
-    def __repr__(self):
-        raise NotImplementedError
+# http://stackoverflow.com/a/456747
+def factory(name):
+    if name in plugins:
+        return plugins[name]
+    else:
+        return None

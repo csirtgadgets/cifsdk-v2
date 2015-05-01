@@ -11,15 +11,13 @@ import logging
 import traceback
 import select
 from pprint import pprint
+from cifsdk.format import factory
 
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 import textwrap
 
 from cifsdk import VERSION, API_VERSION
-from cifsdk.format.table import Table
-
-__max_field_size__ = 30
 
 REMOTE ='https://localhost'
 LIMIT = 5000
@@ -211,7 +209,8 @@ def main():
         logger.critical("missing --remote")
         raise SystemExit
 
-    cli = Client(options['token'], remote=options['remote'], proxy=options.get('proxy'))
+    cli = Client(options['token'], remote=options['remote'], proxy=options.get('proxy'), no_verify_ssl=options[
+        'no_verify_ssl'])
 
     try:
         if(options.get('search') or options.get('tags') or options.get('cc') or options.get('rdata') or options.get(
@@ -256,11 +255,14 @@ def main():
                 filters['asn'] = options['asn']
 
             ret = cli.search(limit=options['limit'], nolog=options['nolog'], filters=filters, sort=options.get('sort'))
+
+            f = factory(options['format'])
+
             try:
-                print(Table(ret))
+                print(f(ret))
             except AttributeError as e:
                 logger.exception(e)
-            
+
         elif options.get('ping'):
             for num in range(0,4):
                 ret = cli.ping()
@@ -268,7 +270,12 @@ def main():
                 select.select([], [], [], 1)
         elif options.get('submit'):
             ret = cli.submit(options["submit"])
-            print(Table(ret))
+            f = factory(options['format'])
+
+            try:
+                print(f(ret))
+            except AttributeError as e:
+                logger.exception(e)
         else:
             logger.warning('operation not supported')
             sys.exit()
