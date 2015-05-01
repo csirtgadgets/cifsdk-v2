@@ -10,6 +10,7 @@ plugins = {
     'csv': Csv
 }
 
+
 # http://stackoverflow.com/a/456747
 def factory(name):
     if name in plugins:
