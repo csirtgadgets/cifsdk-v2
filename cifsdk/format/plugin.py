@@ -1,4 +1,4 @@
-COLUMNS = ['reporttime', 'observable', 'cc', 'asn', 'asn_desc', 'confidence', 'description', 'tags', 'rdata',
+COLUMNS = ['reporttime', 'observable', 'otype', 'cc', 'asn', 'asn_desc', 'confidence', 'description', 'tags', 'rdata',
            'provider']
 MAX_FIELD_SIZE = 30
 

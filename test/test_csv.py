@@ -24,7 +24,7 @@ def test_format_csv():
             'reporttime': '2015-01-01T00:00:00Z'
             }]
 
-    assert Csv(data)
+    assert str(Csv(data))
 
 if __name__ == '__main__':
     test_format_csv()
