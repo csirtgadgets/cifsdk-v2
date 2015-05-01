@@ -15,3 +15,6 @@ cifsdk/format/table.py
 test/__init__.py
 test/test_email.py
 test/test_simple.py
+test/test_table.py
+test/test_csv.py
+test/test_json.py

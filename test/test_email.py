@@ -1,4 +1,4 @@
-import unittest
+# -*- coding: utf-8 -*-
 from cifsdk.urls import extract_urls
 
 text = """
@@ -162,15 +162,10 @@ Unsubscribe option is available on the footer of our website
 """
 
 
-class TestEmail(unittest.TestCase):
-
-    def setUp(self):
-        pass
-
-    def test_urls(self):
-        assert "http://www.codetwo.com" in extract_urls(text)
-        assert "http://www.socialservices.cn/detail.php?id=9" in extract_urls(test2)
+def test_email():
+    assert "http://www.codetwo.com" in extract_urls(text, html=True)
+    #assert "http://www.socialservices.cn/detail.php?id=9" in extract_urls(test2)
 
 
 if __name__ == '__main__':
-    unittest.main()
+    test_email()
