@@ -28,7 +28,7 @@ class Bro(Plugin):
                 d['observable'] = re.sub(r'(https?\:\/\/)', '', d['observable'])
 
             for c in self.cols:
-                y = d.get(c) or '-'
+                y = d.get(c, '-')
                 if type(y) is list:
                     y = SEP.join(y)
                 y = str(y)
