@@ -1,18 +1,11 @@
 from prettytable import PrettyTable
+from cifsdk.format import Plugin
 
-from cifsdk.format import COLUMNS, MAX_FIELD_SIZE
 
+class Table(Plugin):
 
-class Table(object):
-
-    def __init__(self, data, cols=COLUMNS, max_field_size=MAX_FIELD_SIZE):
-        self.cols = cols
-        self.max_field_size = max_field_size
-
-        if type(data) is not list:
-            data = [data]
-
-        self.data = data
+    def __init__(self, *args, **kwargs):
+        super(Table, self).__init__(*args, **kwargs)
 
     def __repr__(self):
         t = PrettyTable(self.cols)
