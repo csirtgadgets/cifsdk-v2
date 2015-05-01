@@ -18,6 +18,8 @@ class Bro(Plugin):
     def __init__(self, *args, **kwargs):
         super(Bro, self).__init__(*args, **kwargs)
 
+        self.cols = ['observable', 'otype', 'tags', 'confidence', 'provider']
+
     def __repr__(self):
         text = []
         for d in self.data:
@@ -36,4 +38,6 @@ class Bro(Plugin):
             text.append("\t".join(r))
 
         text = "\n".join(text)
+        
+        text = "{0}\n{1}".format(HEADER, text)
         return text
