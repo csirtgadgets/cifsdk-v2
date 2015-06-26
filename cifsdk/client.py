@@ -51,6 +51,9 @@ class Client(object):
         filters['nolog'] = nolog
         
         uri = self.remote + '/observables'
+
+        if filters.get('tags') and type(filters.get('tags')) is list:
+            filters['tags'] = ','.join(filters['tags'])
             
         self.logger.debug('uri: %s' % uri)
         self.logger.debug('params: %s', json.dumps(filters))
