@@ -32,9 +32,18 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
 
   cli = Client(token=1234,
                remote='https://localhost',
-               noverifyssl=1)
-
-  ret = cli.search(query='example.com')
+               no_verify_ssl=1)
+  
+  
+  ret = cli.search('example.com')
+  print Table(ret)
+  
+  filters = {
+    "observable": "example.com",
+    "confidence": 35,
+  }
+  
+  ret = cli.search(filters=filters)
   print Table(ret)
   ```
 ### Ping

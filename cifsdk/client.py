@@ -46,9 +46,12 @@ class Client(object):
 
         self.nowait = nowait
     
-    def search(self,decode=True, limit=LIMIT, nolog=None, filters={}, sort='lasttime'):
+    def search(self, query=None, decode=True, limit=LIMIT, nolog=None, filters={}, sort='lasttime'):
         filters['limit'] = limit
         filters['nolog'] = nolog
+
+        if query:
+            filters['observable'] = query
         
         uri = self.remote + '/observables'
 
