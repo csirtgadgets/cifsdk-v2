@@ -75,9 +75,9 @@ class Client(object):
             self.logger.error('request failed: %s' % str(body.status_code))
             return 'request failed: %s' % str(body.status_code)
 
-        pprint(body)
+
         ret = body.content
-        pprint(ret)
+
         if decode:
             self.logger.info('decoding...')
             ret = json.loads(ret)
