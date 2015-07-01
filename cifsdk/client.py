@@ -46,7 +46,7 @@ class Client(object):
 
         self.nowait = nowait
     
-    def search(self, query=None, decode=True, limit=LIMIT, nolog=None, filters={}, sort='lasttime'):
+    def search(self, query=None, decode=True, limit=None, nolog=None, filters={}, sort='lasttime'):
         filters['limit'] = limit
         filters['nolog'] = nolog
 
@@ -75,7 +75,9 @@ class Client(object):
             self.logger.error('request failed: %s' % str(body.status_code))
             return 'request failed: %s' % str(body.status_code)
 
+        pprint(body)
         ret = body.content
+        pprint(ret)
         if decode:
             self.logger.info('decoding...')
             ret = json.loads(ret)
@@ -161,7 +163,7 @@ def main():
     p.add_argument('--submit', help="submit json string")
 
     # flags
-    p.add_argument('--limit', help="result limit", default=500)
+    p.add_argument('--limit', help="result limit", default=None)
     p.add_argument('-n', '--nolog', help='do not log the search', default=None, action="store_true")
 
     # filters
