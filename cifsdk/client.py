@@ -37,7 +37,7 @@ class Client(object):
             self.verify_ssl = False
         else:
             self.verify_ssl = True
-
+        
         self.session = requests.session()
         self.session.headers["Accept"] = "application/vnd.cif.v{0}+json".format(API_VERSION)
         self.session.headers['User-Agent'] = "py-cifsdk/{0}".format(VERSION)
