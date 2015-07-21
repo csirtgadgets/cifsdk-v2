@@ -60,7 +60,6 @@ def main():
     p.add_argument("--raw-headers", help="include raw header data", action="store_true")
     p.add_argument("--provider", help="specify feed provider [default: %(default)s", default="localhost")
 
-
     args = p.parse_args()
 
     loglevel = logging.WARNING
