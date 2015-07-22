@@ -22,8 +22,10 @@ REPLACE = ['=\n', "\t", "\r", '\\n']
 
 from pprint import pprint
 
-
 def extract_urls(msg, html=False):
+
+    msg = msg.decode('utf8')
+
     if html:
         msg = msg.replace("=3D", '=')
         for x in REPLACE:

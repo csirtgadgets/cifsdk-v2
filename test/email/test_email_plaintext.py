@@ -66,7 +66,8 @@ from pprint import pprint
 def test_parse_message():
     body = parse_message(msg)
     assert type(body) is list
-    assert body[0].startswith('Delivered-To: support@barely3am.com')
+    body = body[0].decode('utf-8')
+    assert body.startswith('Delivered-To: support@barely3am.com')
 
 
 def test_email_urls():
