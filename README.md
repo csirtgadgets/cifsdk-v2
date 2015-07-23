@@ -5,8 +5,8 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
 
 # Installation
 # WARNING
-**Before you begin, be careful when installing this on a CIF Server. This WILL OVERWRITE the p5-cif-sdk bin/cif 
-command on the server.***
+**Before you begin, be careful when installing this on a CIF Server Instance. This WILL OVERWRITE the p5-cif-sdk 
+bin/cif command on the server. This SDK is meant to be used as a client interacting with a REMOTE CIF Instance.**
  
 ## Ubuntu
   ```bash
