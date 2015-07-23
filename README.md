@@ -49,7 +49,7 @@ bin/cif command on the server. This SDK is meant to be used as a client interact
   }
   
   ret = cli.search(filters=filters)
-  print Table(ret)
+  print(Table(ret))
   ```
 ### Ping
   ```python
@@ -57,7 +57,7 @@ bin/cif command on the server. This SDK is meant to be used as a client interact
   ...
 
   ret = cli.ping()
-  print "roundtrip: %s ms" % ret
+  print("roundtrip: %s ms" % ret)
   ```
 
 # Support and Documentation
