@@ -4,6 +4,10 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
 [![Build Status](https://travis-ci.org/csirtgadgets/py-cifsdk.png?branch=master)](https://travis-ci.org/csirtgadgets/py-cifsdk)
 
 # Installation
+# WARNING
+**Before you begin, be careful when installing this on a CIF Server. This WILL OVERWRITE the p5-cif-sdk bin/cif 
+command on the server.***
+ 
 ## Ubuntu
   ```bash
   $ sudo apt-get install -y python-dev python-pip git
