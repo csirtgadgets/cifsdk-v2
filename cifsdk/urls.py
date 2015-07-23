@@ -14,10 +14,10 @@ except ImportError:
 # ^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?\xab\xbb\u201c\u201d\u2018\u2019]))')
 
 # re.compile(r'http.?://[a-z,/,\.,\d,\?,=,\-,\+,#,_,&,;,\,,:,@,%,]*', re.IGNORECASE).findall(xxx)
-RE_URL_HTML = r'href=[\'"]?([^\'" >]+)'
+RE_URL_HTML = b'href=[\'"]?([^\'" >]+)'
 #RE_URL_PLAIN = r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s(
 # )<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?\xab\xbb\u201c\u201d\u2018\u2019]))'
-RE_URL_PLAIN = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+RE_URL_PLAIN = b'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 REPLACE = ['=\n', "\t", "\r", '\\n']
 
 from pprint import pprint
@@ -35,7 +35,6 @@ def extract_urls(msg, html=False):
     pprint(urls)
     links = set()
     for u in urls:
-        u = u.rstrip("/")
+        u = str(u.decode()).rstrip("/")
         links.add(u)
-
     return links

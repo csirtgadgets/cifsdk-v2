@@ -38,7 +38,7 @@ def test_format_bro():
     ]
 
     text = str(Bro(data))
-    print text
+    print(text)
     assert text
 
 if __name__ == '__main__':

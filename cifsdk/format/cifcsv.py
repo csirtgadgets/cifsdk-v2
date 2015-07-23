@@ -1,6 +1,10 @@
 from cifsdk.format.plugin import Plugin
 import csv
-import StringIO
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 
 class Csv(Plugin):
@@ -9,7 +13,7 @@ class Csv(Plugin):
         super(Csv, self).__init__(*args, **kwargs)
 
     def __repr__(self):
-        si = StringIO.StringIO()
+        si = StringIO()
         cw = csv.writer(si)
         for obs in self.data:
             r = []

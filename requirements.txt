@@ -2,6 +2,6 @@ requests>=2.4
 PrettyTable>=0.7.2
 pyyaml
 ujson
-email>=4.0.2
+#email>=4.0.2
 pytricia>=0.1
 pyzmail==1.0.3

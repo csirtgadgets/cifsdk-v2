@@ -66,10 +66,10 @@ from pprint import pprint
 def test_parse_message():
     body = parse_message(msg)
     assert type(body) is list
-    assert body[0].startswith('Delivered-To: support@barely3am.com')
+    assert body[0].startswith(b'Delivered-To: support@barely3am.com')
 
 
 def test_email_urls():
     body = parse_message(msg)
     urls = extract_urls(body[0])
-    assert "http://www.socialservices.cn/detail.php?id=9" in urls
+    assert 'http://www.socialservices.cn/detail.php?id=9' in urls
