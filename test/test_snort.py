@@ -46,7 +46,7 @@ def test_format_snort():
     text = str(Snort(data))
     assert text
     assert re.findall(RULE_PATTERN, text)
-    
+
 
 if __name__ == '__main__':
     test_format_snort()
