@@ -24,7 +24,7 @@ def test_format_json():
             'reporttime': '2015-01-01T00:00:00Z'
             }]
 
-    print Json(data)
+    print(Json(data))
     assert Json(data)
 
 if __name__ == '__main__':

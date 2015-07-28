@@ -274,7 +274,7 @@ def main():
         elif options.get('ping'):
             for num in range(0,4):
                 ret = cli.ping()
-                print "roundtrip: %s ms" % ret
+                print("roundtrip: %s ms" % ret)
                 select.select([], [], [], 1)
         elif options.get('submit'):
             ret = cli.submit(options["submit"])
@@ -290,7 +290,7 @@ def main():
 
     except KeyboardInterrupt:
         raise SystemExit
-    except Exception, e:
+    except Exception as e:
         logger.exception(e)
         raise SystemExit
 
