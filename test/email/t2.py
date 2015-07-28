@@ -374,13 +374,12 @@ from pprint import pprint
 
 def test_parse_message():
     body = parse_message(msg)
-    assert type(body) is list
-    assert body[0].startswith(b'Received: from ironport.csirtgadgets.org')
+    assert body.startswith(b'Received: from ironport.csirtgadgets.org')
 
 
 def test_email_urls():
     body = parse_message(msg)
-    urls = extract_urls(body[0])
+    urls = extract_urls(body)
     assert 'http://microsft-exchange-migration.890m.com/' in urls
     assert 'http://microsft-exchange-migration.890mm.com/' in urls
 

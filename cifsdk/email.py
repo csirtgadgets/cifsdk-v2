@@ -124,14 +124,13 @@ def parse_message(msg):
         #    https://github.com/mailpile/Mailpile/blob/master/mailpile/mailutils.py#L668
         #
         # So with all the ways to decode messages, what's the best way?
-        #
-        # if msg.get_default_type() == "text/plain":
-        #     print("get_payload-1:", msg.get_payload(decode=True))
-        # elif msg.get_default_type() == "text/html":
-        #     print("get_payload-2:", msg.get_payload(decode=True))
-        # else:
-        #     # not sure a non mulitpart message has anything be text/plain and text/html
-        #     print("WARNING: unhandled default.type", msg.get_default_type())
+       
+        if msg.get_default_type() == "text/plain":
+            body = msg.get_payload(decode=True)
+        elif msg.get_default_type() == "text/html":
+            body = msg.get_payload(decode=True)
+        else:
+            # not sure a non mulitpart message has anything be text/plain and text/html
+            print("WARNING: unhandled default.type", msg.get_default_type())
 
-        body.append(parse_message_part(msg))
     return body
