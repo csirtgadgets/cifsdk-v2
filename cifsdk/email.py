@@ -1,28 +1,22 @@
-import pyzmail
-import logging
-from pprint import pprint
+from pyzmail import PyzMessage
+from cifsdk.urls import extract_urls
 
 
 def parse_message_urls(msg):
-    msg = pyzmail.PyzMessage.factory(msg)
+    m = PyzMessage.factory(msg)
 
-    body = []
-    if msg.is_multipart():
-        for part in msg.mailparts:
-            body.append(parse_message_part(part))
-    else:
-        body.append(parse_message_part(msg))
+    urls = set()
+    if m.is_multipart():
+        for p in m.mailparts:
+            b = parse_message_part(p)
+            if p.type == 'text/html':
+                u = extract_urls(b, html=True)
+                urls.update(u)
+            if p.type == 'text/plain':
+                u = extract_urls(b)
+                urls.update(u)
 
-        #
-        # if msg.get_default_type() == "text/plain":
-        #     body = msg.get_payload()
-        # elif msg.get_default_type() == "text/html":
-        #     body = msg.get_payload()
-        # else:
-        #     # not sure a non mulitpart message has anything be text/plain and text/html
-        #     print("WARNING: unhandled default.type", msg.get_default_type())
-
-    return body
+    return urls
 
 
 def parse_message_part(part):
@@ -67,7 +61,7 @@ def parse_message_part(part):
 
 def parse_message(msg):
     body = []
-
+    msg = PyzMessage.factory(msg)
     if msg.is_multipart():
         for part in msg.mailparts:
             body.append(parse_message_part(part))

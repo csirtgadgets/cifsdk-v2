@@ -367,8 +367,7 @@ sity Finance Office.</p>
 --_000_142935127191598590bangoracuk_--
 """
 
-from cifsdk.email import parse_message
-from cifsdk.urls import extract_urls
+from cifsdk.email import parse_message, parse_message_part, parse_message_urls
 
 
 def test_parse_message():
@@ -378,20 +377,7 @@ def test_parse_message():
 
 
 def test_email_urls():
-    from pyzmail import PyzMessage
-    from cifsdk.email import parse_message_part
-    m = PyzMessage.factory(msg)
-
-    urls = set()
-    if m.is_multipart():
-        for p in m.mailparts:
-            b = parse_message_part(p)
-            if p.type == 'text/html':
-                u = extract_urls(b, html=True)
-                urls.update(u)
-            if p.type == 'text/plain':
-                u = extract_urls(b)
-                urls.update(u)
+    urls = parse_message_urls(msg)
 
     assert 'http://microsft-exchange-migration.890m.com/' in urls
     assert 'http://microsft-exchange-migration.890mm.com/' in urls
