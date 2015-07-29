@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-msg = """
-Received: from ironport.csirtgadgets.org (192.168.1.26) by mail01.csirtgadgets.org
+msg = """Received: from ironport.csirtgadgets.org (192.168.1.26) by mail01.csirtgadgets.org
  (192.168.1.39) with Microsoft SMTP Server id 14.3.224.2; Fri, 17 Apr 2015
  12:04:26 -0600
 X-SBRS: 5.3
@@ -370,17 +369,34 @@ sity Finance Office.</p>
 
 from cifsdk.email import parse_message
 from cifsdk.urls import extract_urls
-from pprint import pprint
+
 
 def test_parse_message():
     body = parse_message(msg)
-    assert body.startswith(b'Received: from ironport.csirtgadgets.org')
+    assert body[0].startswith('\n\nDear Staff')
+    assert body[1].startswith('<html><head>')
 
 
 def test_email_urls():
-    body = parse_message(msg)
-    urls = extract_urls(body)
+    from pyzmail import PyzMessage
+    from cifsdk.email import parse_message_part
+    m = PyzMessage.factory(msg)
+
+    urls = set()
+    if m.is_multipart():
+        for p in m.mailparts:
+            b = parse_message_part(p)
+            if p.type == 'text/html':
+                u = extract_urls(b, html=True)
+                urls.update(u)
+            if p.type == 'text/plain':
+                u = extract_urls(b)
+                urls.update(u)
+
     assert 'http://microsft-exchange-migration.890m.com/' in urls
     assert 'http://microsft-exchange-migration.890mm.com/' in urls
 
 
+if __name__ == '__main__':
+    test_parse_message()
+    test_email_urls()

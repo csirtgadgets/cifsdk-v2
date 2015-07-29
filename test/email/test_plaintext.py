@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-msg = """
-Delivered-To: support@barely3am.com
+msg = """Delivered-To: support@barely3am.com
 Received: by 10.112.40.50 with SMTP id u18csp916705lbk;
         Sun, 19 Apr 2015 05:50:04 -0700 (PDT)
 X-Received: by 10.42.151.4 with SMTP id c4mr13784232icw.77.1429447803846;
@@ -61,11 +60,11 @@ Unsubscribe option is available on the footer of our website
 
 from cifsdk.email import parse_message
 from cifsdk.urls import extract_urls
-from pprint import pprint
+
 
 def test_parse_message():
     body = parse_message(msg)
-    assert body.startswith(b'Delivered-To: support@barely3am.com')
+    assert body.startswith(b'Hello,')
 
 
 def test_email_urls():

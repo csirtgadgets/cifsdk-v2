@@ -1,8 +1,6 @@
-try:
-    import re2 as re
-except ImportError:
-    import re
+# -*- coding: utf-8 -*-
 
+import re
 # based on some of the work by https://github.com/giovino
 
 # http://stackoverflow.com/questions/499345/regular-expression-to-extract-url-from-an-html-link
@@ -10,31 +8,42 @@ except ImportError:
 # http://daringfireball.net/2010/07/improved_regex_for_matching_urls
 # http://daringfireball.net/misc/2010/07/url-matching-regex-test-data.text
 # https://gist.github.com/uogbuji/705383
-# GRUBER_URLINTEXT_PAT = re.compile(ur'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([
-# ^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?\xab\xbb\u201c\u201d\u2018\u2019]))')
+# http://stackoverflow.com/questions/9760588/how-do-you-extract-a-url-from-a-string-using-python
 
-# re.compile(r'http.?://[a-z,/,\.,\d,\?,=,\-,\+,#,_,&,;,\,,:,@,%,]*', re.IGNORECASE).findall(xxx)
-RE_URL_HTML = b'href=[\'"]?([^\'" >]+)'
-#RE_URL_PLAIN = r'(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s(
-# )<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?\xab\xbb\u201c\u201d\u2018\u2019]))'
-RE_URL_PLAIN = b'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
-REPLACE = ['=\n', "\t", "\r", '\\n']
+RE_URL_PLAIN = r'(https?://[^\s>]+)'
 
 from pprint import pprint
 
 
-def extract_urls(msg, html=False):
-    if html:
-        msg = msg.replace("=3D", '=')
-        for x in REPLACE:
-            msg = msg.replace(x, '')
+def _extract_urls_text(body):
+    urls = set()
+    found = re.findall(RE_URL_PLAIN, body)
 
-        urls = re.findall(RE_URL_HTML, msg)
+    for u in found:
+        urls.add(u)
+
+    return urls
+
+
+def _extract_urls_html(body):
+    from bs4 import BeautifulSoup
+
+    urls = set()
+    soup = BeautifulSoup(body, "lxml")
+
+    for link in soup.find_all('a'):
+        if link.get('href'):
+            urls.add(str(link.get('href')))
+
+    return urls
+
+
+def extract_urls(body, html=False):
+    urls = set()
+
+    if html:
+        urls = _extract_urls_html(body)
     else:
-        urls = re.findall(RE_URL_PLAIN, msg)
-    pprint(urls)
-    links = set()
-    for u in urls:
-        u = str(u.decode()).rstrip("/")
-        links.add(u)
-    return links
+        urls = _extract_urls_text(body)
+
+    return urls
