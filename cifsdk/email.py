@@ -1,6 +1,9 @@
 from pyzmail import PyzMessage
 from cifsdk.urls import extract_urls
 
+# note: on ubuntu 14.04 had to install the following for lxml
+# sudo apt-get install libxml2-dev libxslt-dev python-dev
+# sudo apt-get install zlib1g-dev
 
 def parse_message_urls(msg):
     m = PyzMessage.factory(msg)
