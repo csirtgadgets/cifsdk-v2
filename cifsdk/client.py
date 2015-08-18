@@ -72,8 +72,8 @@ class Client(object):
         self.logger.debug('status code: ' + str(body.status_code))
 
         if body.status_code > 299:
-            self.logger.error('request failed: %s' % str(body.status_code))
-            return 'request failed: %s' % str(body.status_code)
+            self.logger.warning('request failed: %s' % str(body.status_code))
+            raise SystemExit
 
 
         ret = body.content
