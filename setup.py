@@ -38,7 +38,6 @@ setup(
     entry_points={
           'console_scripts': [
               "cif=cifsdk.client:main",
-              "cif-procmail=cifsdk.procmail:main"
               ]
       },
     test_suite="test"
