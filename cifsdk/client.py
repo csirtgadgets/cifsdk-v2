@@ -46,7 +46,17 @@ class Client(object):
 
         self.nowait = nowait
     
-    def search(self, query=None, decode=True, limit=None, nolog=None, filters={}, sort='lasttime'):
+    def search(self, query=None, filters={}, limit=None, nolog=None, sort='lasttime', decode=True):
+        """returns search result set based on either query or filters
+
+        :param query: a single observable (ex: example.com, 192.168.1.1, ...)
+        :param filters: filter results by various attributes: https://github.com/csirtgadgets/massive-octo-spice/wiki/API
+        :param limit: limit results
+        :param nolog: do NOT log query
+        :param sort: sort result set (default: 'lasttime')
+        :param decode: decode the results from JSON (default: yes)
+        :return: list of dicts (observables)
+        """
         filters['limit'] = limit
         filters['nolog'] = nolog
 
@@ -74,7 +84,6 @@ class Client(object):
         if body.status_code > 299:
             self.logger.warning('request failed: %s' % str(body.status_code))
             raise SystemExit
-
 
         ret = body.content
 
