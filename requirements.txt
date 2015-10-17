@@ -3,3 +3,4 @@ PrettyTable>=0.7.2
 pyyaml
 ujson
 pytricia>=0.1
+arrow==0.7.0
