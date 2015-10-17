@@ -173,6 +173,7 @@ def main():
     p.add_argument('--reporttime', help='TODO')
     p.add_argument('--reporttimeend', help='TODO')
     p.add_argument("--tags", help="filter for tags")
+    p.add_argument('--description', help='filter on description')
     p.add_argument('--otype', help='filter by otype')
     p.add_argument("--cc", help="filter for countrycode")
     p.add_argument('--token', help="specify token")
@@ -222,7 +223,7 @@ def main():
 
     try:
         if(options.get('search') or options.get('tags') or options.get('cc') or options.get('rdata') or options.get(
-                'otype') or options.get('provider') or options.get('asn')):
+                'otype') or options.get('provider') or options.get('asn') or options.get('description')):
             filters = {}
             if options.get('search'):
                 filters['observable'] = options['search']
@@ -231,6 +232,9 @@ def main():
 
             if options.get('tags'):
                 filters['tags'] = options['tags']
+
+            if options.get('description'):
+                filters['description'] = options['description']
 
             if options.get('confidence'):
                 filters['confidence'] = options['confidence']
