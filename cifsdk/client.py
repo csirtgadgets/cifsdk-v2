@@ -16,6 +16,7 @@ from cifsdk.format import factory
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 import textwrap
+import arrow
 
 from cifsdk import VERSION, API_VERSION
 
@@ -191,6 +192,9 @@ def main():
     p.add_argument('--provider', help='filter by provider')
     p.add_argument('--asn', help='filter by asn')
 
+    p.add_argument('--last-day', action="store_true", help='filter results by last 24hrs')
+    p.add_argument('--days', help='filter results within last X days')
+
     # Process arguments
     args = p.parse_args()
 
@@ -274,6 +278,18 @@ def main():
 
             if options.get('asn'):
                 filters['asn'] = options['asn']
+
+            if options.get('last_day'):
+                now = arrow.utcnow()
+                filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+                now = now.replace(days=-1)
+                filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+
+            if options.get('days'):
+                now = arrow.utcnow()
+                filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+                now = now.replace(days=-int(options['days']))
+                filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
             ret = cli.search(limit=options['limit'], nolog=options['nolog'], filters=filters, sort=options.get('sort'))
 
