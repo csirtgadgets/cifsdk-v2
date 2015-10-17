@@ -74,11 +74,7 @@ class Client(object):
 
         self.logger.info('searching...')
 
-        try:
-            body = self.session.get(uri, params=filters, verify=self.verify_ssl)
-        except requests.exceptions.ConnectionError:
-            self.logger.error('connection error')
-            return None
+        body = self.session.get(uri, params=filters, verify=self.verify_ssl)
 
         self.logger.debug('status code: ' + str(body.status_code))
 
@@ -160,7 +156,7 @@ def main():
     p.add_argument('-d', '--debug', dest='debug', action="store_true")
     p.add_argument('-V', '--version', action='version', version=VERSION)
     p.add_argument('--no-verify-ssl', action="store_true", default=False)
-    p.add_argument('--remote',  help="remote api location (eg: https://example.com)")
+    p.add_argument('--remote',  help="remote api location (eg: https://example.com)", default=REMOTE)
     p.add_argument('--timeout',  help='connection timeout [default: %(default)s]', default="300")
     p.add_argument('-C', '--config',  help="configuration file [default: %(default)s]",
                    default=os.path.expanduser("~/.cif.yml"))
@@ -225,11 +221,14 @@ def main():
             if not options.get(k):
                 options[k] = config[k]
     else:
-        logger.info("{} config does not exist".format(args.config))
+        logger.warn("{} config does not exist".format(args.config))
 
     if not options.get("remote"):
         logger.critical("missing --remote")
         raise SystemExit
+
+    if not options.get('token'):
+        raise RuntimeError('missing --token')
 
     cli = Client(options['token'], remote=options['remote'], proxy=options.get('proxy'), no_verify_ssl=options[
         'no_verify_ssl'])
