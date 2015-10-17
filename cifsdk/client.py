@@ -16,6 +16,7 @@ from cifsdk.format import factory
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 import textwrap
+import copy
 
 from cifsdk import VERSION, API_VERSION
 
@@ -181,6 +182,10 @@ def main():
     p.add_argument('--provider', help='filter by provider')
     p.add_argument('--asn', help='filter by asn')
 
+    p.add_argument('--feed', action="store_true", help="aggregate results into a feed based on the observable")
+    p.add_argument('--whitelist-limit', help="specify how many whitelist results to use when applying to --feeds "
+                                             "[default %(default)s]", default=25000)
+
     # Process arguments
     args = p.parse_args()
 
@@ -263,6 +268,17 @@ def main():
                 filters['asn'] = options['asn']
 
             ret = cli.search(limit=options['limit'], nolog=options['nolog'], filters=filters, sort=options.get('sort'))
+
+            if options['feed']:
+                wl_filters = copy.deepcopy(filters)
+                wl_filters['tags'] = 'whitelist'
+
+                pprint(wl_filters)
+                pprint(options)
+
+                raise SystemExit
+
+                wl = cli.search(limit=options['whitelist_limit'], nolog=True, filters=filters)
 
             f = factory(options['format'])
 
