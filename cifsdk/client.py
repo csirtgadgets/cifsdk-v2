@@ -11,21 +11,20 @@ import logging
 import traceback
 import select
 from pprint import pprint
-from cifsdk.format import factory
+from cifsdk.format import factory as format_factory
+from cifsdk.feed import factory as feed_factory
 
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 import textwrap
-<<<<<<< HEAD
 import copy
-=======
 import arrow
->>>>>>> fix/31
 
 from cifsdk import VERSION, API_VERSION
 
 REMOTE ='https://localhost'
 LIMIT = 5000
+FEED_CONFIDENCE = 65
 
 
 class Client(object):
@@ -143,6 +142,19 @@ class Client(object):
         self.logger.debug('return time: %.15f' % t1)
         return t1
 
+    def aggregate(self, data, field='observable', sort='confidence'):
+        x = set()
+        rv = []
+        for d in sorted(data, key=lambda x: x[sort], reverse=True):
+            if d[field] not in x:
+                x.add(d[field])
+                rv.append(d)
+
+        return rv
+
+
+
+
 
 def main():
 
@@ -160,7 +172,7 @@ def main():
     p.add_argument('-d', '--debug', dest='debug', action="store_true")
     p.add_argument('-V', '--version', action='version', version=VERSION)
     p.add_argument('--no-verify-ssl', action="store_true", default=False)
-    p.add_argument('--remote',  help="remote api location (eg: https://example.com)", default=REMOTE)
+    p.add_argument('--remote',  help="remote api location (eg: https://example.com)")
     p.add_argument('--timeout',  help='connection timeout [default: %(default)s]', default="300")
     p.add_argument('-C', '--config',  help="configuration file [default: %(default)s]",
                    default=os.path.expanduser("~/.cif.yml"))
@@ -197,6 +209,8 @@ def main():
                                              "[default %(default)s]", default=25000)
     p.add_argument('--last-day', action="store_true", help='filter results by last 24hrs')
     p.add_argument('--days', help='filter results within last X days')
+
+    p.add_argument('--aggregate', help="aggregate around a specific field (ie: observable)")
 
     # Process arguments
     args = p.parse_args()
@@ -257,6 +271,9 @@ def main():
 
             if options.get('confidence'):
                 filters['confidence'] = options['confidence']
+            else:
+                if options.get('feed'):
+                    filters['confidence'] = FEED_CONFIDENCE
 
             if options.get('firsttime'):
                 filters['firsttime'] = options['firsttime']
@@ -299,18 +316,21 @@ def main():
 
             ret = cli.search(limit=options['limit'], nolog=options['nolog'], filters=filters, sort=options.get('sort'))
 
-            if options['feed']:
+            if options.get('aggregate'):
+                ret = cli.aggregate(ret, field=options['aggregate'])
+
+            if options.get('feed'):
                 wl_filters = copy.deepcopy(filters)
                 wl_filters['tags'] = 'whitelist'
 
-                pprint(wl_filters)
-                pprint(options)
+                wl = cli.search(limit=options['whitelist_limit'], nolog=True, filters=wl_filters)
 
-                raise SystemExit
+                f = feed_factory(options['otype'])
+                ret = cli.aggregate(ret)
 
-                wl = cli.search(limit=options['whitelist_limit'], nolog=True, filters=filters)
+                ret = f().process(ret, wl)
 
-            f = factory(options['format'])
+            f = format_factory(options['format'])
 
             try:
                 print(f(ret))
@@ -324,7 +344,7 @@ def main():
                 select.select([], [], [], 1)
         elif options.get('submit'):
             ret = cli.submit(options["submit"])
-            f = factory(options['format'])
+            f = format_factory(options['format'])
 
             try:
                 print(f(ret))

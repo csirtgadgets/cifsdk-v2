@@ -1,4 +1,4 @@
-from cifsdk.feed import tag_contains_whitelist
+
 import pytricia
 
 from pprint import pprint
@@ -13,7 +13,14 @@ PERM_WHITELIST = [
     "224.0.0.0/4",
     "240.0.0.0/5",
     "248.0.0.0/5",
+    "193.107.16.0/24",
 ]
+
+
+def tag_contains_whitelist(data):
+    for d in data:
+        if d == 'whitelist':
+            return True
 
 
 class Ipv4(object):
@@ -22,14 +29,25 @@ class Ipv4(object):
         pass
 
     # https://github.com/jsommers/pytricia
-    def process(self, data, whitelist):
+    def process(self, data, whitelist=[]):
         wl = pytricia.PyTricia()
         for x in PERM_WHITELIST:
             wl.insert(x, True)
 
-        [wl.insert(y, True) for y in whitelist]
+        for y in whitelist:
+            wl.insert(y, True)
 
-        return (y for y in data if y not in wl)
+        # this could be done with generators...
+        rv = []
+
+        for y in data:
+            if tag_contains_whitelist(y['tags']):
+                continue
+
+            if not wl.get(str(y['observable'])):
+                rv.append(y)
+
+        return rv
 
 
 

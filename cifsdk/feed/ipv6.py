@@ -1,4 +1,4 @@
-from cifsdk.feed import tag_contains_whitelist
+#from cifsdk.feed import tag_contains_whitelist
 import pytricia
 import logging
 from pprint import pprint

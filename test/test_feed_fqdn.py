@@ -5,12 +5,34 @@ from cifsdk.feed.fqdn import Fqdn
 from pprint import pprint
 
 data = [
-    'example.com',
-    'test.example.com',
-    'test.test.com',
-    'csirtgadgets.org',
-    'amazon.com',
-    'test.amazon.com'
+    {
+        'observable': 'example.com',
+        'tags': 'botnet',
+    },
+    {
+        'observable': 'test.example.com',
+        'tags': 'malware',
+    },
+    {
+        'observable': 'test.test.com',
+        'tags': 'scanner'
+    },
+    {
+        'observable': 'amazon.com',
+        'tags': 'scanner'
+    },
+    {
+        'observable': 'test.amazon.com',
+        'tags': 'scanner'
+    },
+        {
+        'observable': 'csirtgadgets.org',
+        'tags': 'scanner'
+    },
+    {
+        'observable': 'evil.org',
+        'tags': 'scanner'
+    },
 ]
 
 whitelist = [
@@ -23,10 +45,17 @@ def test_feed_fqdn_whitelist():
 
     y = x.process(data, whitelist)
 
-    assert 'example.com' not in y
-    assert 'csirtgadgets.org' in y
-    assert 'amazon.com' not in y
+    s = set()
+
+    for xx in x.process(data, whitelist):
+        s.add(xx['observable'])
+
+    assert 'example.com' not in s
+    assert 'csirtgadgets.org' in s
+    assert 'amazon.com' not in s
 
     # need to create the trie mod
-    assert 'test.example.com' not in y
-    assert 'test.amazon.com' not in y
+    assert 'test.example.com' not in s
+    assert 'test.amazon.com' not in s
+    assert 'amazon.com' not in s
+    assert 'evil.org' in s

@@ -5,9 +5,18 @@ from cifsdk.feed.ipv4 import Ipv4
 from pprint import pprint
 
 data = [
-    '192.168.1.1',
-    '192.168.2.1',
-    '128.205.1.1',
+    {
+        'observable': '192.168.1.1',
+        'tags': 'botnet',
+    },
+    {
+        'observable': '192.168.2.1',
+        'tags': 'malware',
+    },
+    {
+        'observable': '128.205.1.1',
+        'tags': 'scanner'
+    },
 ]
 
 whitelist = [
@@ -18,7 +27,10 @@ whitelist = [
 def test_feed_ipv4_whitelist():
     x = Ipv4()
 
-    y = x.process(data, whitelist)
+    s = set()
+    for xx in x.process(data, whitelist):
+        s.add(xx['observable'])
 
-    assert '128.205.1.1' in y
-    assert '192.168.1.1' not in y
+    assert '192.168.1.1' not in s
+    assert '192.168.1.1' not in s
+    assert '128.205.1.1' in s

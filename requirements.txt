@@ -2,6 +2,5 @@ requests>=2.4
 PrettyTable>=0.7.2
 pyyaml
 ujson
-git+https://github.com/jsommers/pytricia@2414a6be48366b81dbbfe91cc3d9caea086db794#egg=pytrica==0.2.1-1
-pytricia>=0.1
+pytricia>=0.2.1
 arrow==0.7.0

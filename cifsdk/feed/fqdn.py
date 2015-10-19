@@ -1,5 +1,3 @@
-from cifsdk.feed import tag_contains_whitelist
-import pytricia
 
 from pprint import pprint
 
@@ -19,35 +17,39 @@ PERM_WHITELIST = [
     'bing.com',
     'wordpress.com',
     'msn.com',
+    'update.symantec.com',
 ]
 
-
-def match(fqdn, data):
-    if fqdn in data:
-        return True
 
 
 class Fqdn(object):
 
     def __init__(self):
-        pass
+        self.wl = set()
+        for w in PERM_WHITELIST:
+            self.wl.add(w)
+
+    def match_whitelist(self, wl, d):
+        bits = d.split('.')
+
+        for i, b in enumerate(bits):
+            if '.'.join(bits) in wl:
+                return True
+            bits.pop(0)
 
     # https://github.com/jsommers/pytricia
     def process(self, data, whitelist):
 
-        wl = set()
-        for x in PERM_WHITELIST:
-            wl.add(x)
+        wl = self.wl
 
-        for x in whitelist:
-            wl.add(x)
+        for w in whitelist:
+            wl.add(w)
 
-        rv = set()
+        rv = []
         for x in data:
-            if x not in wl:
-                rv.add(x)
+            if not self.match_whitelist(wl, x['observable']):
+                rv.append(x)
 
-        pprint(rv)
         return rv
 
 
