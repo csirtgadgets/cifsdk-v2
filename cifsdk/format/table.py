@@ -13,7 +13,7 @@ class Table(Plugin):
         for obs in self.data:
             r = []
             for c in self.cols:
-                y = obs.get(c) or ''
+                y = obs.get(c, '')
                 if type(y) is list:
                     y = ','.join(y)
 
