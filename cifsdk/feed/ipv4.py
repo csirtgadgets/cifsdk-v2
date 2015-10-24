@@ -13,7 +13,6 @@ PERM_WHITELIST = [
     "224.0.0.0/4",
     "240.0.0.0/5",
     "248.0.0.0/5",
-    "193.107.16.0/24",
 ]
 
 
@@ -32,10 +31,13 @@ class Ipv4(object):
     def process(self, data, whitelist=[]):
         wl = pytricia.PyTricia()
         for x in PERM_WHITELIST:
-            wl.insert(x, True)
+            wl[x] = True
 
         for y in whitelist:
-            wl.insert(y, True)
+            y = str(y['observable'])
+            if not '/' in y: # weird bug work-around it'll insert 172.16.1.60 with a /0 at the end??
+                y = '{}/32'.format(y)
+            wl[y] = True
 
         # this could be done with generators...
         rv = []
@@ -44,7 +46,7 @@ class Ipv4(object):
             if tag_contains_whitelist(y['tags']):
                 continue
 
-            if not wl.get(str(y['observable'])):
+            if str(y['observable']) not in wl:
                 rv.append(y)
 
         return rv

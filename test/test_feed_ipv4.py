@@ -17,10 +17,17 @@ data = [
         'observable': '128.205.1.1',
         'tags': 'scanner'
     },
+    {
+        'observable': '128.205.2.0/24',
+        'tags': 'scanner'
+    },
 ]
 
 whitelist = [
-    '192.168.1.0/24'
+    {
+        'observable': '192.168.1.0/24',
+        'tags': 'whitelist'
+    },
 ]
 
 
