@@ -16,6 +16,7 @@ from cifsdk.format import factory
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 import textwrap
+import arrow
 
 from cifsdk import VERSION, API_VERSION
 
@@ -51,7 +52,17 @@ class Client(object):
 
         self.nowait = nowait
     
-    def search(self, query=None, decode=True, limit=None, nolog=None, filters={}, sort='lasttime'):
+    def search(self, query=None, filters={}, limit=None, nolog=None, sort='lasttime', decode=True):
+        """returns search result set based on either query or filters
+
+        :param query: a single observable (ex: example.com, 192.168.1.1, ...)
+        :param filters: filter results by various attributes: https://github.com/csirtgadgets/massive-octo-spice/wiki/API
+        :param limit: limit results
+        :param nolog: do NOT log query
+        :param sort: sort result set (default: 'lasttime')
+        :param decode: decode the results from JSON (default: yes)
+        :return: list of dicts (observables)
+        """
         filters['limit'] = limit
         filters['nolog'] = nolog
 
@@ -68,18 +79,13 @@ class Client(object):
 
         self.logger.info('searching...')
 
-        try:
-            body = self.session.get(uri, params=filters, verify=self.verify_ssl)
-        except requests.exceptions.ConnectionError:
-            self.logger.error('connection error')
-            return None
+        body = self.session.get(uri, params=filters, verify=self.verify_ssl)
 
         self.logger.debug('status code: ' + str(body.status_code))
 
         if body.status_code > 299:
             self.logger.warning('request failed: %s' % str(body.status_code))
             raise SystemExit
-
 
         ret = body.content
 
@@ -155,7 +161,7 @@ def main():
     p.add_argument('-d', '--debug', dest='debug', action="store_true")
     p.add_argument('-V', '--version', action='version', version=VERSION)
     p.add_argument('--no-verify-ssl', action="store_true", default=False)
-    p.add_argument('--remote',  help="remote api location (eg: https://example.com)")
+    p.add_argument('--remote',  help="remote api location (eg: https://example.com)", default=REMOTE)
     p.add_argument('--timeout',  help='connection timeout [default: %(default)s]', default="300")
     p.add_argument('-C', '--config',  help="configuration file [default: %(default)s]",
                    default=os.path.expanduser("~/.cif.yml"))
@@ -178,6 +184,7 @@ def main():
     p.add_argument('--reporttime', help='TODO')
     p.add_argument('--reporttimeend', help='TODO')
     p.add_argument("--tags", help="filter for tags")
+    p.add_argument('--description', help='filter on description')
     p.add_argument('--otype', help='filter by otype')
     p.add_argument("--cc", help="filter for countrycode")
     p.add_argument('--token', help="specify token")
@@ -185,6 +192,9 @@ def main():
     p.add_argument('--rdata', help='filter by rdata')
     p.add_argument('--provider', help='filter by provider')
     p.add_argument('--asn', help='filter by asn')
+
+    p.add_argument('--last-day', action="store_true", help='filter results by last 24hrs')
+    p.add_argument('--days', help='filter results within last X days')
 
     # Process arguments
     args = p.parse_args()
@@ -216,18 +226,21 @@ def main():
             if not options.get(k):
                 options[k] = config[k]
     else:
-        logger.info("{} config does not exist".format(args.config))
+        logger.warn("{} config does not exist".format(args.config))
 
     if not options.get("remote"):
         logger.critical("missing --remote")
         raise SystemExit
+
+    if not options.get('token'):
+        raise RuntimeError('missing --token')
 
     cli = Client(options['token'], remote=options['remote'], proxy=options.get('proxy'), no_verify_ssl=options[
         'no_verify_ssl'])
 
     try:
         if(options.get('search') or options.get('tags') or options.get('cc') or options.get('rdata') or options.get(
-                'otype') or options.get('provider') or options.get('asn')):
+                'otype') or options.get('provider') or options.get('asn') or options.get('description')):
             filters = {}
             if options.get('search'):
                 filters['observable'] = options['search']
@@ -236,6 +249,9 @@ def main():
 
             if options.get('tags'):
                 filters['tags'] = options['tags']
+
+            if options.get('description'):
+                filters['description'] = options['description']
 
             if options.get('confidence'):
                 filters['confidence'] = options['confidence']
@@ -266,6 +282,18 @@ def main():
 
             if options.get('asn'):
                 filters['asn'] = options['asn']
+
+            if options.get('last_day'):
+                now = arrow.utcnow()
+                filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+                now = now.replace(days=-1)
+                filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+
+            if options.get('days'):
+                now = arrow.utcnow()
+                filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+                now = now.replace(days=-int(options['days']))
+                filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
             ret = cli.search(limit=options['limit'], nolog=options['nolog'], filters=filters, sort=options.get('sort'))
 
