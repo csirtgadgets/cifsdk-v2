@@ -19,6 +19,11 @@ import textwrap
 
 from cifsdk import VERSION, API_VERSION
 
+# https://urllib3.readthedocs.org/en/latest/security.html#disabling-warnings
+# http://stackoverflow.com/questions/14789631/hide-userwarning-from-urllib2
+import requests
+requests.packages.urllib3.disable_warnings()
+
 REMOTE ='https://localhost'
 LIMIT = 5000
 
