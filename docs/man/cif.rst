@@ -30,19 +30,19 @@ OPTIONS
 -d, --debug
     Debug mode, more output from actions will be shown.
 
---token [string]
+--token
     Specify the API Token to be used, overrides any token specified in the config file.
 
---config [string]
+--config
     Specify the configuration file to be used.
 
---remote [string]
+--remote
     Specify the remote api url.
 
---limit [integer]
+--limit
     Override the default search results LIMIT when searching.
 
---format [string]
+--format
     Specify an output format to represent the data (table, csv, etc..).
 
 --no-verify-ssl
@@ -60,38 +60,38 @@ OPTIONS
 --submit
     Pass a JSON encoded set of observables through STD to the API.
 
--q --search [string]
+-q, --search
     Search the API.
 
---firsttime [string]
+--firsttime
     Filter results by firsttime >= 'YYYY-MM-DDTHH:mm:ssZ'
 
---lasttime [string]
+--lasttime
     Filter results by lasttime >= 'YYYY-MM-DDTHH:mm:ssZ'
 
---tags [comma separated string]
+--tags
     Filter results by a set of tags (ex: 'botnet,zeus').
 
---description [string]
+--description
     Filter results by description (ex: 'zeus')
 
---otype [string]
+--otype
     Filter results by otype (ex: ipv4)
 
---cc [string]
+--cc
     Filter results by country code (ex: US)
 
---confidence [integer]
+--confidence
     Filter results by confidence >= N
 
---rdata example.org
+--rdata
     Filter results by rdata
 
---provider csirtgadgets.org
+--provider
     Filter results by provider
 
 --asn
-    Filter results by ASN number [float|integer]
+    Filter results by ASN number
 
 --feed
     Perform a "feed aggregation" of the results.
@@ -102,7 +102,7 @@ OPTIONS
 --last-day
     Filter results by the last 24hours.
 
---days [integer]
+--days
     Filter results by the N days.
 
 --aggregate
