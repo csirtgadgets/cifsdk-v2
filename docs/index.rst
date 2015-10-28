@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
    
    man/cif
+   man/cif.yml
 
 
 Indices and tables

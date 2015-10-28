@@ -253,7 +253,9 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('man/cif', 'cif', u'CIF Python Client Documentation',
-     [author], 1)
+     [author], 1),
+    ('man/cif.yml', 'cif.yml', u'CIF config file Documentation',
+    [author], 1)
 ]
 
 # If true, show URL addresses after external links.
