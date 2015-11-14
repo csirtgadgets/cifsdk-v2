@@ -50,7 +50,6 @@ bin/cif command on the server. This SDK is meant to be used as a client interact
   
   ret = cli.search(filters=filters)
   print(Table(ret))
-
   ```
 
 ### Submit
