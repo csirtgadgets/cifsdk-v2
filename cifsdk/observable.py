@@ -39,6 +39,26 @@ class Observable(object):
                  asn_desc=None, cc=None, application=None, reference=None, reference_tlp=None,
                  raw=[], confidence=None, logger=logging.getLogger(
                 __name__)):
+        """
+        :param observable: string - the observable (ipv4 address, ipv6 address, fqdn, url, hash)
+        :param otype: string - observable type (ex: ipv4, ipv6, fqdn, url, email)
+        :param tlp: string - Traffic Light Protocol (ex: Red, Amber, Green, White)
+        :param reporttime: string - timestamp (Format: YYYY-MM-DDTHH:MM:SSZ)
+        :param provider: string - provider (ex: spamhaus.org)
+        :param group: string - group membership (ex: everyone)
+        :param protocol: string - layer 4 protocol (ex: icmp, tcp, udp)
+        :param portlist: string - list of ports (ex: 1,2,445-446)
+        :param tags: string - tags describing data (ex: malware, botnet)
+        :param asn: int - ASN number (ex: 87)
+        :param asn_desc: string - ASN description (ex: Indiana University)
+        :param cc: string - Country Code (ex: US)
+        :param application: string - Application commonly associated to the port (ex: http, ssh)
+        :param reference: string - Reference text (ex: https://www.spamhaus.org/drop/)
+        :param reference_tlp: string - Traffic Light Protocol (ex: Red, Amber, Green, White)
+        :param raw:
+        :param confidence: int - Number describing confidence in observable (0-100)
+        :return: object
+        """
 
         self.logger = logger
 

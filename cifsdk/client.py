@@ -27,7 +27,7 @@ from cifsdk import VERSION, API_VERSION
 import requests
 requests.packages.urllib3.disable_warnings()
 
-REMOTE ='https://localhost'
+REMOTE = 'https://localhost'
 LIMIT = 5000
 FEED_CONFIDENCE = 65
 
@@ -35,6 +35,18 @@ FEED_CONFIDENCE = 65
 class Client(object):
 
     def __init__(self, token, remote=REMOTE, proxy=None, timeout=300, no_verify_ssl=False, nowait=False):
+        """
+        Initiates a client object
+
+        :param token: <cif token> (ex: 6e10366ce0a25227aac810b4058c3712d30d3848f4d5d8f586658178a65c67df)
+        :param remote: server location (ex: https://localhost)
+        :param proxy: proxy server location
+        :param timeout: seconds for client timeout (default: 300)
+        :param no_verify_ssl: turn off TLS verification (default: False)
+        :param nowait: batch submissions on the server, do not wait for returned submission id's. Best to
+               to use this if submitting more than 100 records at a time. (default: False)
+        :return: object
+        """
         
         self.logger = logging.getLogger(__name__)
         self.remote = remote
@@ -60,7 +72,7 @@ class Client(object):
 
         :param query: a single observable (ex: example.com, 192.168.1.1, ...)
         :param filters: filter results by various attributes: https://github.com/csirtgadgets/massive-octo-spice/wiki/API
-        :param limit: limit results
+        :param limit: limit return results
         :param nolog: do NOT log query
         :param sort: sort result set (default: 'lasttime')
         :param decode: decode the results from JSON (default: yes)
@@ -104,8 +116,19 @@ class Client(object):
 
     def submit(self, data):
         """
-        '{"observable":"example.com","confidence":"50",":tlp":"amber",
-        "provider":"me.com","tags":["zeus","botnet"]}'
+        Submit records to CIF
+
+        :param data: json or list of json records
+        :return: json
+
+        json
+        {"observable": "1.1.1.1", "confidence": "85", "tlp": "amber", "group": "everyone", "tags": ["zeus","botnet"],
+        "provider": "me.com"}
+
+        list
+        [{"observable": "1.1.1.1", "confidence": "85", "tlp": "amber", "group": "everyone", "tags": ["zeus","botnet"],
+        "provider": "me.com"}, {"observable": "1.1.1.1", "confidence": "85", "tlp": "amber", "group": "everyone",
+        "tags": "malware", "provider": "me.com"}]
         """
         if not data:
             raise RuntimeError
@@ -115,7 +138,7 @@ class Client(object):
                 data = [data]
             data = json.dumps(data)
 
-        ##TODO - http://docs.python-requests.org/en/latest/user/quickstart/#more-complicated-post-requests
+        # TODO - http://docs.python-requests.org/en/latest/user/quickstart/#more-complicated-post-requests
         uri = self.remote + '/observables'
 
         if self.nowait:
@@ -134,6 +157,10 @@ class Client(object):
         return body
     
     def ping(self):
+        """
+        Ping the server to verify connectivity
+        :return: str
+        """
         t0 = time.time()
         uri = str(self.remote) + '/ping'
         body = self.session.get(uri, params={}, verify=self.verify_ssl)
@@ -148,6 +175,13 @@ class Client(object):
         return t1
 
     def aggregate(self, data, field='observable', sort='confidence'):
+        """
+        aggregate data
+        :param data:
+        :param field:
+        :param sort:
+        :return:
+        """
         x = set()
         rv = []
         for d in sorted(data, key=lambda x: x[sort], reverse=True):
@@ -156,9 +190,6 @@ class Client(object):
                 rv.append(d)
 
         return rv
-
-
-
 
 
 def main():
