@@ -1,6 +1,7 @@
-requests>=2.4
-PrettyTable>=0.7.2
-pyyaml
-ujson
-pytricia>=0.2.1
-arrow==0.7.0
+pytricia==0.2.1
+requests==2.6.2
+prettytable==0.7.2
+PyYAML==3.11
+tailer==0.3
+arrow==0.6.0
+pytest==2.7.0
