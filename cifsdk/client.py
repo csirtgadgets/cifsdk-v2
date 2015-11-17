@@ -16,7 +16,7 @@ import copy
 import arrow
 
 from cifsdk import VERSION, API_VERSION
-from cifsdk.constants import REMOTE_ADDR, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY
+from cifsdk.constants import REMOTE_ADDR, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY, FEED_LIMIT
 
 # https://urllib3.readthedocs.org/en/latest/security.html#disabling-warnings
 # http://stackoverflow.com/questions/14789631/hide-userwarning-from-urllib2
@@ -318,7 +318,11 @@ def main():
                 now = now.replace(days=-int(options['days']))
                 filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
-            ret = cli.search(limit=options['limit'], nolog=options['nolog'], filters=filters, sort=options.get('sort'))
+            mylimit = options.get('limit', LIMIT)
+            if options.get('feed'):
+                limit = FEED_LIMIT
+
+            ret = cli.search(limit=mylimit, nolog=options['nolog'], filters=filters, sort=options.get('sort'))
 
             if options.get('aggregate'):
                 ret = cli.aggregate(ret, field=options['aggregate'])
