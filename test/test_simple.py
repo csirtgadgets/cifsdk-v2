@@ -1,21 +1,10 @@
-import unittest
+import py.test
 from cifsdk.client import Client
 
 
-class TestSimple(unittest.TestCase):
+def test_client():
+    cli = Client(token=1234, remote='https://localhost2:8443', verify_ssl=False)
 
-    def setUp(self):
-        self.cli = Client(token=1234,remote='https://localhost2:8443',
-                          no_verify_ssl=1)
-        
-    def test_remote(self):
-        self.assertEqual(self.cli.remote,'https://localhost2:8443','remote-mismatch')
-    
-    def test_verifyssl(self):
-        self.assertEqual(self.cli.verify_ssl,0, 'verify-ssl mis-match')
-        
-    def test_token(self):
-        self.assertEqual(self.cli.token,'1234','token-mismatch')
-
-if __name__ == '__main__':
-    unittest.main()
+    assert cli.verify_ssl is False
+    assert cli.remote == 'https://localhost2:8443','remote-mismatch'
+    assert cli.token == '1234', 'token mismatch'

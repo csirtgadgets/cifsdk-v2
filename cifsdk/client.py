@@ -1,16 +1,11 @@
 import json
-import requests
 import time
-import logging
-
 import sys
 import os
 import os.path
 import yaml
 import logging
-import traceback
 import select
-from pprint import pprint
 from cifsdk.format import factory as format_factory
 from cifsdk.feed import factory as feed_factory
 
@@ -21,20 +16,19 @@ import copy
 import arrow
 
 from cifsdk import VERSION, API_VERSION
+from cifsdk.constants import REMOTE_ADDR, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY
 
 # https://urllib3.readthedocs.org/en/latest/security.html#disabling-warnings
 # http://stackoverflow.com/questions/14789631/hide-userwarning-from-urllib2
 import requests
 requests.packages.urllib3.disable_warnings()
 
-REMOTE = 'https://localhost'
-LIMIT = 5000
-FEED_CONFIDENCE = 65
+from cifsdk.utils import setup_logging, read_config
 
 
 class Client(object):
 
-    def __init__(self, token, remote=REMOTE, proxy=None, timeout=300, no_verify_ssl=False, nowait=False):
+    def __init__(self, token, remote=REMOTE_ADDR, proxy=None, timeout=300, verify_ssl=True, nowait=False):
         """
         Initiates a client object
 
@@ -53,11 +47,7 @@ class Client(object):
         self.token = str(token)
         self.proxy = proxy
         self.timeout = timeout
-        
-        if no_verify_ssl:
-            self.verify_ssl = False
-        else:
-            self.verify_ssl = True
+        self.verify_ssl = verify_ssl
         
         self.session = requests.session()
         self.session.headers["Accept"] = "application/vnd.cif.v{0}+json".format(API_VERSION)
@@ -195,6 +185,7 @@ def main():
         description=textwrap.dedent('''\
         example usage:
             $ cif --search example.com
+            $ cif -q 1.2.3.0/24 --feed --format csv
         '''),
         formatter_class=RawDescriptionHelpFormatter,
         prog='cif'
@@ -236,10 +227,11 @@ def main():
     p.add_argument('--rdata', help='filter by rdata')
     p.add_argument('--provider', help='filter by provider')
     p.add_argument('--asn', help='filter by asn')
+    p.add_argument('--proxy', help="specify a proxy to use [default %(default)s]", default=PROXY)
 
     p.add_argument('--feed', action="store_true", help="aggregate results into a feed based on the observable")
     p.add_argument('--whitelist-limit', help="specify how many whitelist results to use when applying to --feeds "
-                                             "[default %(default)s]", default=25000)
+                                             "[default %(default)s]", default=WHITELIST_LIMIT)
     p.add_argument('--last-day', action="store_true", help='filter results by last 24hrs')
     p.add_argument('--days', help='filter results within last X days')
 
@@ -247,35 +239,11 @@ def main():
 
     # Process arguments
     args = p.parse_args()
-
-    # setup the initial console logging
-    fmt = '%(asctime)s - %(levelname)s - %(name)s::%(threadName)s - %(message)s'
-    loglevel = logging.WARNING
-    if args.verbose:
-        loglevel = logging.INFO
-    if args.debug:
-        loglevel = logging.DEBUG
-
-    console = logging.StreamHandler()
-    logging.getLogger('').setLevel(loglevel)
-    console.setFormatter(logging.Formatter(fmt))
-    logging.getLogger('').addHandler(console)
-    logger = logging.getLogger(__name__)
+    logger = setup_logging(args)
 
     options = vars(args)
-
-    if os.path.isfile(args.config):
-        f = file(args.config)
-        config = yaml.load(f)
-        f.close()
-        if not config['client']:
-            raise Exception("Unable to read " + args.config + " config file")
-        config = config['client']
-        for k in config:
-            if not options.get(k):
-                options[k] = config[k]
-    else:
-        logger.warn("{} config does not exist".format(args.config))
+    o = read_config(args)
+    options.update(o)
 
     if not options.get("remote"):
         logger.critical("missing --remote")
@@ -284,8 +252,11 @@ def main():
     if not options.get('token'):
         raise RuntimeError('missing --token')
 
-    cli = Client(options['token'], remote=options['remote'], proxy=options.get('proxy'), no_verify_ssl=options[
-        'no_verify_ssl'])
+    verify_ssl = True
+    if options.get('no_verify_ssl'):
+        verify_ssl = False
+
+    cli = Client(options['token'], remote=options['remote'], proxy=options.get('proxy'), verify_ssl=verify_ssl)
 
     try:
         if(options.get('search') or options.get('tags') or options.get('cc') or options.get('rdata') or options.get(
@@ -385,7 +356,7 @@ def main():
                 logger.exception(e)
         else:
             logger.warning('operation not supported')
-            sys.exit()
+            raise SystemExit
 
     except KeyboardInterrupt:
         raise SystemExit
@@ -394,4 +365,4 @@ def main():
         raise SystemExit
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
