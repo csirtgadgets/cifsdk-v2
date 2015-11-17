@@ -209,7 +209,7 @@ def main():
     p.add_argument('--submit', help="submit json string")
 
     # flags
-    p.add_argument('--limit', help="result limit", default=None)
+    p.add_argument('--limit', help="result limit")
     p.add_argument('-n', '--nolog', help='do not log the search', default=None, action="store_true")
 
     # filters
