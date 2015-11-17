@@ -118,25 +118,22 @@ class Client(object):
         """
         Submit records to CIF
 
-        :param data: json or list of json records
-        :return: json
-
-        json
-        {"observable": "1.1.1.1", "confidence": "85", "tlp": "amber", "group": "everyone", "tags": ["zeus","botnet"],
-        "provider": "me.com"}
+        :param data: a single dict or a list of dicts
+        :return: list
 
         list
         [{"observable": "1.1.1.1", "confidence": "85", "tlp": "amber", "group": "everyone", "tags": ["zeus","botnet"],
         "provider": "me.com"}, {"observable": "1.1.1.1", "confidence": "85", "tlp": "amber", "group": "everyone",
         "tags": "malware", "provider": "me.com"}]
         """
-        if not data:
-            raise RuntimeError
 
-        if not isinstance(data, basestring):
-            if type(data) != list:
-                data = [data]
-            data = json.dumps(data)
+        if type(data) == dict:
+            data = [data]
+
+        if type(data[0]) != dict:
+            raise RuntimeError('submitted data must be a dictionary')
+
+        data = json.dumps(data)
 
         # TODO - http://docs.python-requests.org/en/latest/user/quickstart/#more-complicated-post-requests
         uri = self.remote + '/observables'
