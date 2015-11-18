@@ -3,9 +3,6 @@ import logging
 import yaml
 import os
 from cifsdk.constants import LOG_FORMAT
-from argparse import ArgumentParser
-
-from cifsdk.constants import REMOTE_ADDR
 
 
 def read_config(args):
@@ -13,6 +10,7 @@ def read_config(args):
     if os.path.isfile(args.config):
         f = file(args.config)
         config = yaml.load(f)
+        config = config['client']
         f.close()
         if not config:
             raise Exception("Unable to read {} config file".format(args.config))
@@ -20,8 +18,6 @@ def read_config(args):
             if not options.get(k):
                 options[k] = config[k]
 
-        if config.get('remote') and (options['remote'] == REMOTE_ADDR):
-            options['remote'] = config['remote']
     else:
         raise Exception("Unable to read {} config file".format(args.config))
 

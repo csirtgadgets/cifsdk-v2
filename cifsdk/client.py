@@ -16,7 +16,7 @@ import copy
 import arrow
 
 from cifsdk import VERSION, API_VERSION
-from cifsdk.constants import REMOTE_ADDR, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY, FEED_LIMIT
+from cifsdk.constants import REMOTE_ADDR, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY, FEED_LIMIT, TOKEN
 
 # https://urllib3.readthedocs.org/en/latest/security.html#disabling-warnings
 # http://stackoverflow.com/questions/14789631/hide-userwarning-from-urllib2
@@ -196,7 +196,8 @@ def main():
     p.add_argument('-d', '--debug', dest='debug', action="store_true")
     p.add_argument('-V', '--version', action='version', version=VERSION)
     p.add_argument('--no-verify-ssl', action="store_true", default=False)
-    p.add_argument('--remote',  help="remote api location (eg: https://example.com)")
+    p.add_argument('--remote',  help="remote api location")
+    p.add_argument('--token', help="specify token",  default=TOKEN)
     p.add_argument('--timeout',  help='connection timeout [default: %(default)s]', default="300")
     p.add_argument('-C', '--config',  help="configuration file [default: %(default)s]",
                    default=os.path.expanduser("~/.cif.yml"))
@@ -213,7 +214,7 @@ def main():
     p.add_argument('-n', '--nolog', help='do not log the search', default=None, action="store_true")
 
     # filters
-    p.add_argument('-q', "--search", help="search for observable")
+    p.add_argument('-q', "--query", help="specify a search")
     p.add_argument('--firsttime', help='firsttime or later')
     p.add_argument('--lasttime', help='lasttime or earlier')
     p.add_argument('--reporttime', help='TODO')
@@ -222,7 +223,6 @@ def main():
     p.add_argument('--description', help='filter on description')
     p.add_argument('--otype', help='filter by otype')
     p.add_argument("--cc", help="filter for countrycode")
-    p.add_argument('--token', help="specify token")
     p.add_argument('-c', '--confidence', help="specify confidence")
     p.add_argument('--rdata', help='filter by rdata')
     p.add_argument('--provider', help='filter by provider')
@@ -239,21 +239,20 @@ def main():
 
     # Process arguments
     args = p.parse_args()
-    logger = setup_logging(args)
+    setup_logging(args)
+    logger = logging.getLogger(__name__)
 
-    options = vars(args)
     o = read_config(args)
-    options.update(o)
-
-    if not options.get("remote"):
-        logger.critical("missing --remote")
-        raise SystemExit
+    options = vars(args)
+    for v in options:
+        if options[v] is None:
+            options[v] = o.get(v)
 
     if not options.get('token'):
         raise RuntimeError('missing --token')
 
     verify_ssl = True
-    if options.get('no_verify_ssl'):
+    if o.get('no_verify_ssl') or options.get('no_verify_ssl'):
         verify_ssl = False
 
     cli = Client(options['token'], remote=options['remote'], proxy=options.get('proxy'), verify_ssl=verify_ssl)
@@ -365,7 +364,7 @@ def main():
     except KeyboardInterrupt:
         raise SystemExit
     except Exception as e:
-        logger.exception(e)
+        logger.error(e)
         raise SystemExit
 
 if __name__ == "__main__":

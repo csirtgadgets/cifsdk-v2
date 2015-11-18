@@ -18,3 +18,5 @@ WHITELIST_LIMIT = 25000
 WHITELIST_LIMIT = os.environ.get('CIF_WHITELIST_LIMIT', WHITELIST_LIMIT)
 
 PROXY = os.environ.get('CIF_PROXY')
+
+TOKEN = os.environ.get('CIF_TOKEN')
