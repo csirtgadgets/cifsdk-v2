@@ -211,7 +211,7 @@ def main():
                    default=os.path.expanduser("~/.cif.yml"))
 
     p.add_argument('--sort', help='sort output ASC by key', default='reporttime')
-    p.add_argument('--format', help="specify output format [default: %(default)s]", default="table")
+    p.add_argument('-f', '--format', help="specify output format [default: %(default)s]", default="table")
 
     # actions
     p.add_argument('-p', '--ping', action="store_true", help="ping")
@@ -232,7 +232,7 @@ def main():
     p.add_argument('--otype', help='filter by otype')
     p.add_argument("--cc", help="filter for countrycode")
     p.add_argument('--token', help="specify token")
-    p.add_argument('--confidence', help="specify confidence")
+    p.add_argument('-c', '--confidence', help="specify confidence")
     p.add_argument('--rdata', help='filter by rdata')
     p.add_argument('--provider', help='filter by provider')
     p.add_argument('--asn', help='filter by asn')
