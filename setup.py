@@ -4,10 +4,6 @@ import sys
 with open('requirements.txt') as f:
     reqs = f.read().splitlines()
 
-if sys.version_info < (3,):
-    reqs.append('email>=4.0.2')
-
-
 import versioneer
 versioneer.VCS = 'git'
 versioneer.versionfile_source = 'cifsdk/_version.py'
