@@ -192,8 +192,8 @@ def main():
     )
 
     # options
-    p.add_argument("-v", "--verbose", dest="verbose", action="count", help="set verbosity level [default: %(default)s]")
-    p.add_argument('-d', '--debug', dest='debug', action="store_true")
+    p.add_argument("-v", "--verbose", dest="verbose", action="store_true", help="logging level: INFO")
+    p.add_argument('-d', '--debug', dest='debug', action="store_true", help="logging level: DEBUG")
     p.add_argument('-V', '--version', action='version', version=VERSION)
     p.add_argument('--no-verify-ssl', action="store_true", default=False)
     p.add_argument('-R', '--remote',  help="remote api location")
