@@ -196,8 +196,8 @@ def main():
     p.add_argument('-d', '--debug', dest='debug', action="store_true")
     p.add_argument('-V', '--version', action='version', version=VERSION)
     p.add_argument('--no-verify-ssl', action="store_true", default=False)
-    p.add_argument('--remote',  help="remote api location")
-    p.add_argument('--token', help="specify token",  default=TOKEN)
+    p.add_argument('-R', '--remote',  help="remote api location")
+    p.add_argument('-T', '--token', help="specify token",  default=TOKEN)
     p.add_argument('--timeout',  help='connection timeout [default: %(default)s]', default="300")
     p.add_argument('-C', '--config',  help="configuration file [default: %(default)s]",
                    default=os.path.expanduser("~/.cif.yml"))
@@ -207,18 +207,22 @@ def main():
 
     # actions
     p.add_argument('-p', '--ping', action="store_true", help="ping")
-    p.add_argument('--submit', help="submit json string")
+    p.add_argument('-s', '--submit', help="submit dict or list of dicts string")
 
     # flags
-    p.add_argument('--limit', help="result limit")
+    p.add_argument('-l', '--limit', help="result limit")
     p.add_argument('-n', '--nolog', help='do not log the search', default=None, action="store_true")
 
     # filters
     p.add_argument('-q', "--query", help="specify a search")
-    p.add_argument('--firsttime', help='firsttime or later')
-    p.add_argument('--lasttime', help='lasttime or earlier')
-    p.add_argument('--reporttime', help='TODO')
-    p.add_argument('--reporttimeend', help='TODO')
+    p.add_argument('--firsttime', help='specify filter based on firsttime timestmap (greater than, '
+                                       'format: YYYY-MM-DDTHH:MM:SSZ)')
+    p.add_argument('--lasttime', help='specify filter based on lasttime timestamp (less than, format: '
+                                      'YYYY-MM-DDTHH:MM:SSZ)')
+    p.add_argument('--reporttime', help='specify filter based on reporttime timestmap (greater than, format: '
+                                        'YYYY-MM-DDTHH:MM:SSZ)')
+    p.add_argument('--reporttimeend', help='specify filter based on reporttime timestmap (less than, format: '
+                                           'YYYY-MM-DDTHH:MM:SSZ)')
     p.add_argument("--tags", help="filter for tags")
     p.add_argument('--description', help='filter on description')
     p.add_argument('--otype', help='filter by otype')
@@ -229,10 +233,11 @@ def main():
     p.add_argument('--asn', help='filter by asn')
     p.add_argument('--proxy', help="specify a proxy to use [default %(default)s]", default=PROXY)
 
-    p.add_argument('--feed', action="store_true", help="aggregate results into a feed based on the observable")
+    p.add_argument('--feed', action="store_true", help="generate a feed of data, meaning deduplicated and whitelisted")
     p.add_argument('--whitelist-limit', help="specify how many whitelist results to use when applying to --feeds "
                                              "[default %(default)s]", default=WHITELIST_LIMIT)
-    p.add_argument('--last-day', action="store_true", help='filter results by last 24hrs')
+    p.add_argument('--last-day', action="store_true", help='auto-sets reporttime to 23 hours and 59 seconds ago '
+                                                           '(current time UTC) and reporttime-end to "now"')
     p.add_argument('--days', help='filter results within last X days')
 
     p.add_argument('--aggregate', help="aggregate around a specific field (ie: observable)")
@@ -359,6 +364,7 @@ def main():
                 logger.exception(e)
         else:
             logger.warning('operation not supported')
+            p.print_help()
             raise SystemExit
 
     except KeyboardInterrupt:
