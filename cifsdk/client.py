@@ -207,7 +207,7 @@ def main():
 
     # actions
     p.add_argument('-p', '--ping', action="store_true", help="ping")
-    p.add_argument('-s', '--submit', help="submit dict or list of dicts string")
+    p.add_argument('-s', '--submit', action="store_true", help="submit a JSON object")
 
     # flags
     p.add_argument('-l', '--limit', help="result limit")
@@ -355,13 +355,24 @@ def main():
                 print("roundtrip: %s ms" % ret)
                 select.select([], [], [], 1)
         elif options.get('submit'):
-            ret = cli.submit(options["submit"])
-            f = format_factory(options['format'])
+
+            if not sys.stdin.isatty():
+                stdin = sys.stdin.read()
+            else:
+                logger.error("No data passed via STDIN")
+                raise SystemExit
 
             try:
-                print(f(ret))
-            except AttributeError as e:
-                logger.exception(e)
+                data = json.loads(stdin)
+                try:
+                    ret = cli.submit(data)
+                    print('submitted: {0}'.format(ret))
+                except Exception as e:
+                    logger.error(e)
+                    raise SystemExit
+            except Exception as e:
+                logger.error(e)
+                raise SystemExit
         else:
             logger.warning('operation not supported')
             p.print_help()
