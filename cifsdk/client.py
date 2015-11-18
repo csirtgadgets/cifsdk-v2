@@ -345,7 +345,10 @@ def main():
             f = format_factory(options['format'])
 
             try:
-                print(f(ret))
+                if len(ret) >= 1:
+                    print(f(ret))
+                else:
+                    logger.info("no results found...")
             except AttributeError as e:
                 logger.exception(e)
 
