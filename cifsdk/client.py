@@ -184,7 +184,7 @@ def main():
     p = ArgumentParser(
         description=textwrap.dedent('''\
         example usage:
-            $ cif --search example.com
+            $ cif --query example.com
             $ cif -q 1.2.3.0/24 --feed --format csv
         '''),
         formatter_class=RawDescriptionHelpFormatter,
@@ -258,11 +258,11 @@ def main():
     cli = Client(options['token'], remote=options['remote'], proxy=options.get('proxy'), verify_ssl=verify_ssl)
 
     try:
-        if(options.get('search') or options.get('tags') or options.get('cc') or options.get('rdata') or options.get(
+        if(options.get('query') or options.get('tags') or options.get('cc') or options.get('rdata') or options.get(
                 'otype') or options.get('provider') or options.get('asn') or options.get('description')):
             filters = {}
-            if options.get('search'):
-                filters['observable'] = options['search']
+            if options.get('query'):
+                filters['observable'] = options['query']
             if options.get('cc'):
                 filters['cc'] = options['cc']
 
