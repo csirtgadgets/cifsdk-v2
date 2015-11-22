@@ -8,7 +8,7 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
 bin/cif command on the server. This SDK is meant to be used as a client interacting with a REMOTE CIF Instance.**
 
 # Installation
- 
+
 ## Ubuntu
   ```bash
   $ sudo apt-get install -y python-dev python-pip git
@@ -38,16 +38,16 @@ bin/cif command on the server. This SDK is meant to be used as a client interact
   cli = Client(token='1234',
                remote='https://localhost',
                verify_ssl=False)
-  
-  
+
+
   ret = cli.search('example.com')
   print Table(ret)
-  
+
   filters = {
     "observable": "example.com",
     "confidence": 35,
   }
-  
+
   ret = cli.search(filters=filters)
   print(Table(ret))
   ```
