@@ -32,6 +32,12 @@ bin/cif command on the server. This SDK is meant to be used as a client interact
   $ cif --token 1234 --remote 'https://localhost' -q example.com --format json
   ```
 
+### Running with STIX plugin
+   ```bash
+   $ pip install stix  # requires many other 3rd party xml bloat
+   $ cif --token 1234 --remote 'https://localhost' -q example.com --format
+   ```
+   
 ## API
 ### Search
   ```python
