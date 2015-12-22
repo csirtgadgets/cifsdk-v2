@@ -1,16 +1,11 @@
 import json
-import requests
 import time
-import logging
-
 import sys
 import os
 import os.path
 import yaml
 import logging
-import traceback
 import select
-from pprint import pprint
 from cifsdk.format import factory as format_factory
 from cifsdk.feed import factory as feed_factory
 
@@ -21,20 +16,19 @@ import copy
 import arrow
 
 from cifsdk import VERSION, API_VERSION
+from cifsdk.constants import REMOTE_ADDR, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY, FEED_LIMIT, TOKEN
 
 # https://urllib3.readthedocs.org/en/latest/security.html#disabling-warnings
 # http://stackoverflow.com/questions/14789631/hide-userwarning-from-urllib2
 import requests
 requests.packages.urllib3.disable_warnings()
 
-REMOTE = 'https://localhost'
-LIMIT = 5000
-FEED_CONFIDENCE = 65
+from cifsdk.utils import setup_logging, read_config
 
 
 class Client(object):
 
-    def __init__(self, token, remote=REMOTE, proxy=None, timeout=300, no_verify_ssl=False, nowait=False):
+    def __init__(self, token, remote=REMOTE_ADDR, proxy=None, timeout=300, verify_ssl=True, nowait=False):
         """
         Initiates a client object
 
@@ -53,11 +47,7 @@ class Client(object):
         self.token = str(token)
         self.proxy = proxy
         self.timeout = timeout
-        
-        if no_verify_ssl:
-            self.verify_ssl = False
-        else:
-            self.verify_ssl = True
+        self.verify_ssl = verify_ssl
         
         self.session = requests.session()
         self.session.headers["Accept"] = "application/vnd.cif.v{0}+json".format(API_VERSION)
@@ -194,18 +184,20 @@ def main():
     p = ArgumentParser(
         description=textwrap.dedent('''\
         example usage:
-            $ cif --search example.com
+            $ cif --query example.com
+            $ cif -q 1.2.3.0/24 --feed --format csv
         '''),
         formatter_class=RawDescriptionHelpFormatter,
         prog='cif'
     )
 
     # options
-    p.add_argument("-v", "--verbose", dest="verbose", action="count", help="set verbosity level [default: %(default)s]")
-    p.add_argument('-d', '--debug', dest='debug', action="store_true")
+    p.add_argument("-v", "--verbose", dest="verbose", action="store_true", help="logging level: INFO")
+    p.add_argument('-d', '--debug', dest='debug', action="store_true", help="logging level: DEBUG")
     p.add_argument('-V', '--version', action='version', version=VERSION)
     p.add_argument('--no-verify-ssl', action="store_true", default=False)
-    p.add_argument('--remote',  help="remote api location (eg: https://example.com)")
+    p.add_argument('-R', '--remote',  help="remote api location")
+    p.add_argument('-T', '--token', help="specify token",  default=TOKEN)
     p.add_argument('--timeout',  help='connection timeout [default: %(default)s]', default="300")
     p.add_argument('-C', '--config',  help="configuration file [default: %(default)s]",
                    default=os.path.expanduser("~/.cif.yml"))
@@ -215,84 +207,67 @@ def main():
 
     # actions
     p.add_argument('-p', '--ping', action="store_true", help="ping")
-    p.add_argument('--submit', help="submit json string")
+    p.add_argument('-s', '--submit', action="store_true", help="submit a JSON object")
 
     # flags
-    p.add_argument('--limit', help="result limit", default=None)
+    p.add_argument('-l', '--limit', help="result limit")
     p.add_argument('-n', '--nolog', help='do not log the search', default=None, action="store_true")
 
     # filters
-    p.add_argument('-q', "--search", help="search for observable")
-    p.add_argument('--firsttime', help='firsttime or later')
-    p.add_argument('--lasttime', help='lasttime or earlier')
-    p.add_argument('--reporttime', help='TODO')
-    p.add_argument('--reporttimeend', help='TODO')
+    p.add_argument('-q', "--query", help="specify a search")
+    p.add_argument('--firsttime', help='specify filter based on firsttime timestmap (greater than, '
+                                       'format: YYYY-MM-DDTHH:MM:SSZ)')
+    p.add_argument('--lasttime', help='specify filter based on lasttime timestamp (less than, format: '
+                                      'YYYY-MM-DDTHH:MM:SSZ)')
+    p.add_argument('--reporttime', help='specify filter based on reporttime timestmap (greater than, format: '
+                                        'YYYY-MM-DDTHH:MM:SSZ)')
+    p.add_argument('--reporttimeend', help='specify filter based on reporttime timestmap (less than, format: '
+                                           'YYYY-MM-DDTHH:MM:SSZ)')
     p.add_argument("--tags", help="filter for tags")
     p.add_argument('--description', help='filter on description')
     p.add_argument('--otype', help='filter by otype')
     p.add_argument("--cc", help="filter for countrycode")
-    p.add_argument('--token', help="specify token")
     p.add_argument('-c', '--confidence', help="specify confidence")
     p.add_argument('--rdata', help='filter by rdata')
     p.add_argument('--provider', help='filter by provider')
     p.add_argument('--asn', help='filter by asn')
+    p.add_argument('--proxy', help="specify a proxy to use [default %(default)s]", default=PROXY)
 
-    p.add_argument('--feed', action="store_true", help="aggregate results into a feed based on the observable")
+    p.add_argument('--feed', action="store_true", help="generate a feed of data, meaning deduplicated and whitelisted")
     p.add_argument('--whitelist-limit', help="specify how many whitelist results to use when applying to --feeds "
-                                             "[default %(default)s]", default=25000)
-    p.add_argument('--last-day', action="store_true", help='filter results by last 24hrs')
+                                             "[default %(default)s]", default=WHITELIST_LIMIT)
+    p.add_argument('--last-day', action="store_true", help='auto-sets reporttime to 23 hours and 59 seconds ago '
+                                                           '(current time UTC) and reporttime-end to "now"')
     p.add_argument('--days', help='filter results within last X days')
 
     p.add_argument('--aggregate', help="aggregate around a specific field (ie: observable)")
 
     # Process arguments
     args = p.parse_args()
-
-    # setup the initial console logging
-    fmt = '%(asctime)s - %(levelname)s - %(name)s::%(threadName)s - %(message)s'
-    loglevel = logging.WARNING
-    if args.verbose:
-        loglevel = logging.INFO
-    if args.debug:
-        loglevel = logging.DEBUG
-
-    console = logging.StreamHandler()
-    logging.getLogger('').setLevel(loglevel)
-    console.setFormatter(logging.Formatter(fmt))
-    logging.getLogger('').addHandler(console)
+    setup_logging(args)
     logger = logging.getLogger(__name__)
 
+    o = read_config(args)
     options = vars(args)
-
-    if os.path.isfile(args.config):
-        f = file(args.config)
-        config = yaml.load(f)
-        f.close()
-        if not config['client']:
-            raise Exception("Unable to read " + args.config + " config file")
-        config = config['client']
-        for k in config:
-            if not options.get(k):
-                options[k] = config[k]
-    else:
-        logger.warn("{} config does not exist".format(args.config))
-
-    if not options.get("remote"):
-        logger.critical("missing --remote")
-        raise SystemExit
+    for v in options:
+        if options[v] is None:
+            options[v] = o.get(v)
 
     if not options.get('token'):
         raise RuntimeError('missing --token')
 
-    cli = Client(options['token'], remote=options['remote'], proxy=options.get('proxy'), no_verify_ssl=options[
-        'no_verify_ssl'])
+    verify_ssl = True
+    if o.get('no_verify_ssl') or options.get('no_verify_ssl'):
+        verify_ssl = False
+
+    cli = Client(options['token'], remote=options['remote'], proxy=options.get('proxy'), verify_ssl=verify_ssl)
 
     try:
-        if(options.get('search') or options.get('tags') or options.get('cc') or options.get('rdata') or options.get(
+        if(options.get('query') or options.get('tags') or options.get('cc') or options.get('rdata') or options.get(
                 'otype') or options.get('provider') or options.get('asn') or options.get('description')):
             filters = {}
-            if options.get('search'):
-                filters['observable'] = options['search']
+            if options.get('query'):
+                filters['observable'] = options['query']
             if options.get('cc'):
                 filters['cc'] = options['cc']
 
@@ -347,7 +322,11 @@ def main():
                 now = now.replace(days=-int(options['days']))
                 filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
-            ret = cli.search(limit=options['limit'], nolog=options['nolog'], filters=filters, sort=options.get('sort'))
+            mylimit = options.get('limit', LIMIT)
+            if options.get('feed'):
+                limit = FEED_LIMIT
+
+            ret = cli.search(limit=mylimit, nolog=options['nolog'], filters=filters, sort=options.get('sort'))
 
             if options.get('aggregate'):
                 ret = cli.aggregate(ret, field=options['aggregate'])
@@ -366,7 +345,10 @@ def main():
             f = format_factory(options['format'])
 
             try:
-                print(f(ret))
+                if len(ret) >= 1:
+                    print(f(ret))
+                else:
+                    logger.info("no results found...")
             except AttributeError as e:
                 logger.exception(e)
 
@@ -376,22 +358,34 @@ def main():
                 print("roundtrip: %s ms" % ret)
                 select.select([], [], [], 1)
         elif options.get('submit'):
-            ret = cli.submit(options["submit"])
-            f = format_factory(options['format'])
+
+            if not sys.stdin.isatty():
+                stdin = sys.stdin.read()
+            else:
+                logger.error("No data passed via STDIN")
+                raise SystemExit
 
             try:
-                print(f(ret))
-            except AttributeError as e:
-                logger.exception(e)
+                data = json.loads(stdin)
+                try:
+                    ret = cli.submit(data)
+                    print('submitted: {0}'.format(ret))
+                except Exception as e:
+                    logger.error(e)
+                    raise SystemExit
+            except Exception as e:
+                logger.error(e)
+                raise SystemExit
         else:
             logger.warning('operation not supported')
-            sys.exit()
+            p.print_help()
+            raise SystemExit
 
     except KeyboardInterrupt:
         raise SystemExit
     except Exception as e:
-        logger.exception(e)
+        logger.error(e)
         raise SystemExit
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
