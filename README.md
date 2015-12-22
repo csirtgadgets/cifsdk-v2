@@ -24,7 +24,9 @@ bin/cif command on the server. This SDK is meant to be used as a client interact
     remote: https://localhost
     token: 1234
   ```
-### Running
+### Running out of the box
+These plugins are minimal and run out of the box
+
   ```bash
   $ cif --token 1234 --remote 'https://localhost' -q example.com
   $ cif --token 1234 --remote 'https://localhost' -q example.com --format csv
@@ -32,7 +34,9 @@ bin/cif command on the server. This SDK is meant to be used as a client interact
   $ cif --token 1234 --remote 'https://localhost' -q example.com --format json
   ```
 
-### Running with STIX plugin
+### Running with 3rd party plugins
+These plugins typically require extra [bloated] code, not installed by default
+
    ```bash
    $ pip install stix  # requires many other 3rd party xml bloat
    $ cif --token 1234 --remote 'https://localhost' -q example.com --format stix
