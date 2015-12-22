@@ -37,6 +37,7 @@ These plugins are minimal and run out of the box
 ### Running with 3rd party plugins
 These plugins typically require extra [bloated] code, not installed by default
 
+#### STIX
    ```bash
    $ pip install stix  # requires many other 3rd party xml bloat
    $ cif --token 1234 --remote 'https://localhost' -q example.com --format stix
