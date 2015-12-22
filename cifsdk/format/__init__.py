@@ -12,6 +12,12 @@ plugins = {
     'bro': Bro
 }
 
+try:
+    from cifsdk.format.cif_stix import Stix
+    plugins['stix'] = Stix
+except:
+    pass
+
 
 # http://stackoverflow.com/a/456747
 def factory(name):

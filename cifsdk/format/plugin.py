@@ -6,6 +6,8 @@ MAX_FIELD_SIZE = 30
 class Plugin(object):
 
     def __init__(self, data=[], cols=COLUMNS, max_field_size=MAX_FIELD_SIZE):
+        from pprint import pprint
+
         self.cols = cols
         self.max_field_size = max_field_size
         self.data = data

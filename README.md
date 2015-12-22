@@ -27,6 +27,9 @@ bin/cif command on the server. This SDK is meant to be used as a client interact
 ### Running
   ```bash
   $ cif --token 1234 --remote 'https://localhost' -q example.com
+  $ cif --token 1234 --remote 'https://localhost' -q example.com --format csv
+  $ cif --token 1234 --remote 'https://localhost' -q example.com --format table
+  $ cif --token 1234 --remote 'https://localhost' -q example.com --format json
   ```
 
 ## API
