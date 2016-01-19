@@ -13,13 +13,14 @@ def read_config(args):
         config = config['client']
         f.close()
         if not config:
-            raise Exception("Unable to read {} config file".format(args.config))
+            print("Unable to read {} config file".format(args.config))
+            raise SystemExit
         for k in config:
             if not options.get(k):
                 options[k] = config[k]
-
     else:
-        raise Exception("Unable to read {} config file".format(args.config))
+        print("Unable to read {} config file".format(args.config))
+        raise SystemExit
 
     return options
 
