@@ -40,6 +40,7 @@ class Fqdn(object):
     def process(self, data, whitelist):
 
         wl = self.wl
+
         for w in whitelist:
             wl.add(w['observable'])
 
