@@ -39,4 +39,4 @@ def test_stix():
         d = Stix(data)
         assert len(str(d)) > 2
     else:
-        print 'STIX package not installed, skipping test'
+        print('STIX package not installed, skipping test')
