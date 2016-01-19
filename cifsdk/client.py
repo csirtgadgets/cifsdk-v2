@@ -1,4 +1,4 @@
-import json
+import ujson as json
 import time
 import sys
 import os
@@ -14,9 +14,11 @@ from argparse import RawDescriptionHelpFormatter
 import textwrap
 import copy
 import arrow
+import zlib
+import base64
 
 from cifsdk import VERSION, API_VERSION
-from cifsdk.constants import REMOTE_ADDR, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY, FEED_LIMIT, TOKEN
+from cifsdk.constants import REMOTE_ADDR, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY, FEED_LIMIT, TOKEN, FIELDS
 
 # https://urllib3.readthedocs.org/en/latest/security.html#disabling-warnings
 # http://stackoverflow.com/questions/14789631/hide-userwarning-from-urllib2
@@ -70,6 +72,7 @@ class Client(object):
         """
         filters['limit'] = limit
         filters['nolog'] = nolog
+        filters['gzip'] = 1
 
         if query:
             filters['observable'] = query
@@ -92,7 +95,16 @@ class Client(object):
             self.logger.warning('request failed: %s' % str(body.status_code))
             raise SystemExit
 
-        ret = body.content
+        s = (int(body.headers['Content-Length']) / 1024 / 1024)
+        self.logger.info('processing {} megs'.format(s))
+
+        if filters['gzip']:
+            self.logger.info('decompressing...')
+            # http://stackoverflow.com/a/2695575
+            ret = base64.b64decode(body.text)
+            ret = zlib.decompress(ret, 16+zlib.MAX_WBITS)
+        else:
+            ret = body.text
 
         if decode:
             self.logger.info('decoding...')
@@ -231,6 +243,7 @@ def main():
     p.add_argument('--rdata', help='filter by rdata')
     p.add_argument('--provider', help='filter by provider')
     p.add_argument('--asn', help='filter by asn')
+    p.add_argument('--tlp', help='filter by tlp')
     p.add_argument('--proxy', help="specify a proxy to use [default %(default)s]", default=PROXY)
 
     p.add_argument('--feed', action="store_true", help="generate a feed of data, meaning deduplicated and whitelisted")
@@ -241,6 +254,8 @@ def main():
     p.add_argument('--days', help='filter results within last X days')
 
     p.add_argument('--aggregate', help="aggregate around a specific field (ie: observable)")
+
+    p.add_argument('--fields', help="specify field list to display [default: %(default)s]", default=','.join(FIELDS))
 
     # Process arguments
     args = p.parse_args()
@@ -262,129 +277,134 @@ def main():
 
     cli = Client(options['token'], remote=options['remote'], proxy=options.get('proxy'), verify_ssl=verify_ssl)
 
-    try:
-        if(options.get('query') or options.get('tags') or options.get('cc') or options.get('rdata') or options.get(
+    if(options.get('query') or options.get('tags') or options.get('cc') or options.get('rdata') or options.get(
                 'otype') or options.get('provider') or options.get('asn') or options.get('description')):
-            filters = {}
-            if options.get('query'):
-                filters['observable'] = options['query']
-            if options.get('cc'):
-                filters['cc'] = options['cc']
+        filters = {}
+        if options.get('query'):
+            filters['observable'] = options['query']
+        if options.get('cc'):
+            filters['cc'] = options['cc']
 
-            if options.get('tags'):
-                filters['tags'] = options['tags']
+        if options.get('tags'):
+            filters['tags'] = options['tags']
 
-            if options.get('description'):
-                filters['description'] = options['description']
+        if options.get('description'):
+            filters['description'] = options['description']
 
-            if options.get('confidence'):
-                filters['confidence'] = options['confidence']
-            else:
-                if options.get('feed'):
-                    filters['confidence'] = FEED_CONFIDENCE
+        if options.get('confidence'):
+            filters['confidence'] = options['confidence']
+        else:
+            if options.get('feed'):
+                filters['confidence'] = FEED_CONFIDENCE
 
-            if options.get('firsttime'):
-                filters['firsttime'] = options['firsttime']
+        if options.get('firsttime'):
+            filters['firsttime'] = options['firsttime']
 
-            if options.get('lasttime'):
-                filters['lasttime'] = options['lasttime']
+        if options.get('lasttime'):
+            filters['lasttime'] = options['lasttime']
 
-            if options.get('reporttime'):
-                filters['reporttime'] = options['reporttime']
+        if options.get('reporttime'):
+            filters['reporttime'] = options['reporttime']
 
-            if options.get('reporttimeend'):
-                filters['reporttimeend'] = options['reporttimeend']
+        if options.get('reporttimeend'):
+            filters['reporttimeend'] = options['reporttimeend']
 
-            if options.get('otype'):
-                filters['otype'] = options['otype']
+        if options.get('otype'):
+            filters['otype'] = options['otype']
 
-            if options.get('rdata'):
-                filters['rdata'] = options['rdata']
+        if options.get('rdata'):
+            filters['rdata'] = options['rdata']
 
-            if options.get('nolog'):
-                options['nolog'] = 1
+        if options.get('nolog'):
+            options['nolog'] = 1
 
-            if options.get('provider'):
-                filters['provider'] = options['provider']
+        if options.get('provider'):
+            filters['provider'] = options['provider']
 
-            if options.get('asn'):
-                filters['asn'] = options['asn']
+        if options.get('asn'):
+            filters['asn'] = options['asn']
 
-            if options.get('last_day'):
+        if options.get('tlp'):
+            filters['tlp'] = options['tlp']
+
+        if options.get('last_day'):
+            now = arrow.utcnow()
+            filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+            now = now.replace(days=-1)
+            filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+
+        if options.get('days'):
+            now = arrow.utcnow()
+            filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+            now = now.replace(days=-int(options['days']))
+            filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+
+        mylimit = options.get('limit', LIMIT)
+        if options.get('feed'):
+            limit = FEED_LIMIT
+            if not options.get('days'):
                 now = arrow.utcnow()
                 filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
-                now = now.replace(days=-1)
+                now = now.replace(days=-3)
                 filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
-            if options.get('days'):
-                now = arrow.utcnow()
-                filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
-                now = now.replace(days=-int(options['days']))
-                filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+        ret = cli.search(limit=mylimit, nolog=options['nolog'], filters=filters, sort=options.get('sort'))
 
-            mylimit = options.get('limit', LIMIT)
-            if options.get('feed'):
-                limit = FEED_LIMIT
+        if options.get('aggregate'):
+            ret = cli.aggregate(ret, field=options['aggregate'])
 
-            ret = cli.search(limit=mylimit, nolog=options['nolog'], filters=filters, sort=options.get('sort'))
+        if options.get('feed'):
+            wl_filters = copy.deepcopy(filters)
+            wl_filters['tags'] = 'whitelist'
 
-            if options.get('aggregate'):
-                ret = cli.aggregate(ret, field=options['aggregate'])
+            now = arrow.utcnow()
+            now = now.replace(days=-3)
+            wl_filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
-            if options.get('feed'):
-                wl_filters = copy.deepcopy(filters)
-                wl_filters['tags'] = 'whitelist'
+            wl = cli.search(limit=options['whitelist_limit'], nolog=True, filters=wl_filters)
 
-                wl = cli.search(limit=options['whitelist_limit'], nolog=True, filters=wl_filters)
+            f = feed_factory(options['otype'])
+            ret = cli.aggregate(ret)
 
-                f = feed_factory(options['otype'])
-                ret = cli.aggregate(ret)
+            ret = f().process(ret, wl)
 
-                ret = f().process(ret, wl)
+        f = format_factory(options['format'])
 
-            f = format_factory(options['format'])
-
-            try:
-                if len(ret) >= 1:
-                    print(f(ret))
-                else:
-                    logger.info("no results found...")
-            except AttributeError as e:
-                logger.exception(e)
-
-        elif options.get('ping'):
-            for num in range(0,4):
-                ret = cli.ping()
-                print("roundtrip: %s ms" % ret)
-                select.select([], [], [], 1)
-        elif options.get('submit'):
-
-            if not sys.stdin.isatty():
-                stdin = sys.stdin.read()
+        try:
+            if len(ret) >= 1:
+                print(f(ret, cols=options['fields'].split(',')))
             else:
-                logger.error("No data passed via STDIN")
-                raise SystemExit
+                logger.info("no results found...")
+        except AttributeError as e:
+            logger.exception(e)
 
+    elif options.get('ping'):
+        for num in range(0,4):
+            ret = cli.ping()
+            print("roundtrip: %s ms" % ret)
+            select.select([], [], [], 1)
+    elif options.get('submit'):
+
+        if not sys.stdin.isatty():
+            stdin = sys.stdin.read()
+        else:
+            logger.error("No data passed via STDIN")
+            raise SystemExit
+
+        try:
+            data = json.loads(stdin)
             try:
-                data = json.loads(stdin)
-                try:
-                    ret = cli.submit(data)
-                    print('submitted: {0}'.format(ret))
-                except Exception as e:
-                    logger.error(e)
-                    raise SystemExit
+                ret = cli.submit(data)
+                print('submitted: {0}'.format(ret))
             except Exception as e:
                 logger.error(e)
                 raise SystemExit
-        else:
-            logger.warning('operation not supported')
-            p.print_help()
+        except Exception as e:
+            logger.error(e)
             raise SystemExit
-
-    except KeyboardInterrupt:
-        raise SystemExit
-    except Exception as e:
-        logger.error(e)
+    else:
+        logger.warning('operation not supported')
+        p.print_help()
         raise SystemExit
 
 if __name__ == "__main__":

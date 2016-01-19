@@ -21,7 +21,6 @@ PERM_WHITELIST = [
 ]
 
 
-
 class Fqdn(object):
 
     def __init__(self):
@@ -41,9 +40,8 @@ class Fqdn(object):
     def process(self, data, whitelist):
 
         wl = self.wl
-
         for w in whitelist:
-            wl.add(w)
+            wl.add(w['observable'])
 
         rv = []
         for x in data:
