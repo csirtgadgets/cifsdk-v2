@@ -98,14 +98,12 @@ class Client(object):
         s = (int(body.headers['Content-Length']) / 1024 / 1024)
         self.logger.info('processing {} megs'.format(s))
 
-        try:
+        ret = body.content
+        if not ret.startswith('[{'):
             self.logger.info('trying to decompress...')
             # http://stackoverflow.com/a/2695575
-            ret = base64.b64decode(body.text)
+            ret = base64.b64decode(ret)
             ret = zlib.decompress(ret, 16+zlib.MAX_WBITS)
-        except (TypeError, zlib.error):
-            self.logger.info('content not compressed')
-            ret = body.text
 
         if decode:
             self.logger.info('decoding...')
