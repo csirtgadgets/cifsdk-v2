@@ -46,8 +46,16 @@ These plugins typically require extra [bloated] code, not installed by default
 ## API
 ### Search
   ```python
+  import logging
   from cifsdk.client import Client
   from cifsdk.format import Table
+
+  LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s[%(lineno)s] - %(message)s'
+  loglevel = logging.INFO
+  console = logging.StreamHandler()
+  logging.getLogger('').setLevel(loglevel)
+  console.setFormatter(logging.Formatter(LOG_FORMAT))
+  logging.getLogger('').addHandler(console)
 
   cli = Client(token='1234',
                remote='https://localhost',
@@ -68,7 +76,15 @@ These plugins typically require extra [bloated] code, not installed by default
 
 ### Submit
    ```python
+   import logging
    from cifsdk.client import Client
+
+   LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s[%(lineno)s] - %(message)s'
+   loglevel = logging.INFO
+   console = logging.StreamHandler()
+   logging.getLogger('').setLevel(loglevel)
+   console.setFormatter(logging.Formatter(LOG_FORMAT))
+   logging.getLogger('').addHandler(console)
 
    data = '{"observable":"example4.com","tlp":"amber","confidence":"85","tags":"malware","provider":"example.com","group":"everyone"}'
 
