@@ -24,3 +24,5 @@ TOKEN = os.environ.get('CIF_TOKEN')
 FIELDS = ['tlp', 'group', 'reporttime', 'observable', 'otype', 'cc', 'asn', 'asn_desc', 'confidence', 'description',
           'tags', 'rdata', 'provider']
 FIELDS = os.environ.get('CIF_FIELDS', FIELDS)
+
+PINGS=4

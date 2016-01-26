@@ -19,6 +19,7 @@ import base64
 
 from cifsdk import VERSION, API_VERSION
 from cifsdk.constants import REMOTE_ADDR, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY, FEED_LIMIT, TOKEN, FIELDS
+from cifsdk.constants import PINGS
 
 # https://urllib3.readthedocs.org/en/latest/security.html#disabling-warnings
 # http://stackoverflow.com/questions/14789631/hide-userwarning-from-urllib2
@@ -256,6 +257,7 @@ def main():
 
     p.add_argument('--fields', help="specify field list to display [default: %(default)s]", default=','.join(FIELDS))
     p.add_argument('--filename', help='specify output filename [default: STDOUT]')
+    p.add_argument('--ttl', help='specify number of pings to send [default: %(default)s]', default=PINGS)
 
     # Process arguments
     args = p.parse_args()
@@ -384,7 +386,7 @@ def main():
             logger.exception(e)
 
     elif options.get('ping'):
-        for num in range(0,4):
+        for num in range(0, args.ttl):
             ret = cli.ping()
             print("roundtrip: %s ms" % ret)
             select.select([], [], [], 1)
