@@ -268,6 +268,7 @@ def main():
     p.add_argument('--fields', help="specify field list to display [default: %(default)s]", default=','.join(FIELDS))
     p.add_argument('--filename', help='specify output filename [default: STDOUT]')
     p.add_argument('--ttl', help='specify number of pings to send [default: %(default)s]', default=PINGS)
+    p.add_argument('--group', help='filter by group(s) (everyone,group1,group2,...)')
 
     # Process arguments
     args = p.parse_args()
@@ -338,6 +339,9 @@ def main():
 
         if options.get('tlp'):
             filters['tlp'] = options['tlp']
+
+        if options.get('group'):
+            filters['group'] = options['group']
 
         # needs to be MEG'd out.
         if options.get('last_day'):
