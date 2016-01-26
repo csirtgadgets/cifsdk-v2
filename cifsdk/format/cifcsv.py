@@ -21,8 +21,10 @@ class Csv(Plugin):
                 y = obs.get(c) or ''
                 if type(y) is list:
                     y = ','.join(y)
-                y = str(y)
+                if type(y) == int:
+                    y = str(y)
+
                 y = (y[:self.max_field_size] + '..') if len(y) > self.max_field_size else y
-                r.append(y)
+                r.append(y.encode('utf-8'))
             cw.writerow(r)
         return si.getvalue().strip('\r\n')
