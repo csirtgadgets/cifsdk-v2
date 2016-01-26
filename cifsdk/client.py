@@ -258,6 +258,8 @@ def main():
 
     p.add_argument('--last-day', action="store_true", help='auto-sets reporttime to 23 hours and 59 seconds ago '
                                                            '(current time UTC) and reporttime-end to "now"')
+    p.add_argument('--last-hour', action='store_true', help='auto-sets reporttime to the beginning of the previous full'
+                                                            ' hour and reporttime-end to end of previous full hour')
     p.add_argument('--days', help='filter results within last X days')
 
     p.add_argument('--aggregate', help="aggregate around a specific field (ie: observable)")
@@ -340,6 +342,11 @@ def main():
             now = arrow.utcnow()
             filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
             now = now.replace(days=-1)
+            filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+        elif options.get('last_hour'):
+            now = arrow.utcnow()
+            filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+            now = now.replace(hours=-1)
             filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
         if options.get('days'):
