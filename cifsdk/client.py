@@ -19,6 +19,7 @@ import base64
 
 from cifsdk import VERSION, API_VERSION
 from cifsdk.constants import REMOTE_ADDR, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY, FEED_LIMIT, TOKEN, FIELDS
+from cifsdk.constants import PINGS, WHITELIST_CONFIDENCE
 
 # https://urllib3.readthedocs.org/en/latest/security.html#disabling-warnings
 # http://stackoverflow.com/questions/14789631/hide-userwarning-from-urllib2
@@ -59,7 +60,7 @@ class Client(object):
 
         self.nowait = nowait
     
-    def search(self, query=None, filters={}, limit=None, nolog=None, sort='lasttime', decode=True):
+    def search(self, query=None, filters={}, limit=None, nolog=None, sort='lasttime', sort_direction='ASC', decode=True):
         """returns search result set based on either query or filters
 
         :param query: a single observable (ex: example.com, 192.168.1.1, ...)
@@ -99,7 +100,7 @@ class Client(object):
         self.logger.info('processing {} megs'.format(s))
 
         ret = body.content
-        if not ret.startswith('[{'):
+        if not ret.startswith('['):
             self.logger.info('trying to decompress...')
             # http://stackoverflow.com/a/2695575
             ret = base64.b64decode(ret)
@@ -110,7 +111,10 @@ class Client(object):
             ret = json.loads(ret)
 
             self.logger.info('sorting...')
-            ret = sorted(ret, key=lambda o: o[sort])
+            if sort_direction == 'DESC':
+                ret = sorted(ret, key=lambda o: o[sort], reverse=True)
+            else:
+                ret = sorted(ret, key=lambda o: o[sort])
 
         self.logger.debug('returning..')
         return ret
@@ -213,7 +217,8 @@ def main():
     p.add_argument('-C', '--config',  help="configuration file [default: %(default)s]",
                    default=os.path.expanduser("~/.cif.yml"))
 
-    p.add_argument('--sort', help='sort output ASC by key', default='reporttime')
+    p.add_argument('--sortby', help='sort output [default: %(default)s]', default='lasttime')
+    p.add_argument('--sortby-direction', help='sortby direction [default: %(default)s]', default='ASC')
     p.add_argument('-f', '--format', help="specify output format [default: %(default)s]", default="table")
 
     # actions
@@ -248,13 +253,24 @@ def main():
     p.add_argument('--feed', action="store_true", help="generate a feed of data, meaning deduplicated and whitelisted")
     p.add_argument('--whitelist-limit', help="specify how many whitelist results to use when applying to --feeds "
                                              "[default %(default)s]", default=WHITELIST_LIMIT)
+    p.add_argument('--whitelist-confidence', help='by confidence (greater-than or equal to) [default: %(default)s]',
+                   default=WHITELIST_CONFIDENCE)
+
     p.add_argument('--last-day', action="store_true", help='auto-sets reporttime to 23 hours and 59 seconds ago '
                                                            '(current time UTC) and reporttime-end to "now"')
+    p.add_argument('--last-hour', action='store_true', help='auto-sets reporttime to the beginning of the previous full'
+                                                            ' hour and reporttime-end to end of previous full hour')
     p.add_argument('--days', help='filter results within last X days')
+    p.add_argument('--today', help='auto-sets reporttime to today, 00:00:00Z (UTC)', action='store_true')
 
     p.add_argument('--aggregate', help="aggregate around a specific field (ie: observable)")
 
     p.add_argument('--fields', help="specify field list to display [default: %(default)s]", default=','.join(FIELDS))
+    p.add_argument('--filename', help='specify output filename [default: STDOUT]')
+    p.add_argument('--ttl', help='specify number of pings to send [default: %(default)s]', default=PINGS)
+    p.add_argument('--group', help='filter by group(s) (everyone,group1,group2,...)')
+    p.add_argument('--application', help='filter based on application field')
+    p.add_argument('--id', help='specify an id to retrieve')
 
     # Process arguments
     args = p.parse_args()
@@ -326,11 +342,29 @@ def main():
         if options.get('tlp'):
             filters['tlp'] = options['tlp']
 
+        if options.get('group'):
+            filters['group'] = options['group']
+
+        if options.get('application'):
+            filters['application'] = options['application']
+
+        if options.get('id'):
+            filters['id'] = options['id']
+
+        # needs to be MEG'd out.
         if options.get('last_day'):
             now = arrow.utcnow()
             filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
             now = now.replace(days=-1)
             filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+        elif options.get('last_hour'):
+            now = arrow.utcnow()
+            filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+            now = now.replace(hours=-1)
+            filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+        elif options.get('today'):
+            now = arrow.utcnow()
+            filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDT00:00:00'))
 
         if options.get('days'):
             now = arrow.utcnow()
@@ -347,7 +381,8 @@ def main():
                 now = now.replace(days=-3)
                 filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
-        ret = cli.search(limit=mylimit, nolog=options['nolog'], filters=filters, sort=options.get('sort'))
+        ret = cli.search(limit=mylimit, nolog=options['nolog'], filters=filters, sort=options['sortby'],
+                         sort_direction=options['sortby_direction'])
 
         if options.get('aggregate'):
             ret = cli.aggregate(ret, field=options['aggregate'])
@@ -355,6 +390,7 @@ def main():
         if options.get('feed'):
             wl_filters = copy.deepcopy(filters)
             wl_filters['tags'] = 'whitelist'
+            wl_filters['confidence'] = args.whitelist_confidence
 
             now = arrow.utcnow()
             now = now.replace(days=-3)
@@ -371,14 +407,19 @@ def main():
 
         try:
             if len(ret) >= 1:
-                print(f(ret, cols=options['fields'].split(',')))
+                ret = f(ret, cols=options['fields'].split(','))
+                if args.filename:
+                    with open(args.filename, 'w') as F:
+                        F.write(str(ret))
+                else:
+                    print(ret)
             else:
                 logger.info("no results found...")
         except AttributeError as e:
             logger.exception(e)
 
     elif options.get('ping'):
-        for num in range(0,4):
+        for num in range(0, args.ttl):
             ret = cli.ping()
             print("roundtrip: %s ms" % ret)
             select.select([], [], [], 1)
