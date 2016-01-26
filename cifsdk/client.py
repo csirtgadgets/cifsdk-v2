@@ -255,6 +255,7 @@ def main():
     p.add_argument('--aggregate', help="aggregate around a specific field (ie: observable)")
 
     p.add_argument('--fields', help="specify field list to display [default: %(default)s]", default=','.join(FIELDS))
+    p.add_argument('--filename', help='specify output filename [default: STDOUT]')
 
     # Process arguments
     args = p.parse_args()
@@ -371,7 +372,12 @@ def main():
 
         try:
             if len(ret) >= 1:
-                print(f(ret, cols=options['fields'].split(',')))
+                ret = f(ret, cols=options['fields'].split(','))
+                if args.filename:
+                    with open(args.filename, 'w') as F:
+                        F.write(str(ret))
+                else:
+                    print(ret)
             else:
                 logger.info("no results found...")
         except AttributeError as e:
