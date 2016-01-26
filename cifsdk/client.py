@@ -100,7 +100,7 @@ class Client(object):
         self.logger.info('processing {} megs'.format(s))
 
         ret = body.content
-        if not ret.startswith('[{'):
+        if not ret.startswith('['):
             self.logger.info('trying to decompress...')
             # http://stackoverflow.com/a/2695575
             ret = base64.b64decode(ret)
