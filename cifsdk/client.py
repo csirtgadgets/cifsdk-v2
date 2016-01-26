@@ -19,7 +19,7 @@ import base64
 
 from cifsdk import VERSION, API_VERSION
 from cifsdk.constants import REMOTE_ADDR, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY, FEED_LIMIT, TOKEN, FIELDS
-from cifsdk.constants import PINGS
+from cifsdk.constants import PINGS, WHITELIST_CONFIDENCE
 
 # https://urllib3.readthedocs.org/en/latest/security.html#disabling-warnings
 # http://stackoverflow.com/questions/14789631/hide-userwarning-from-urllib2
@@ -253,6 +253,9 @@ def main():
     p.add_argument('--feed', action="store_true", help="generate a feed of data, meaning deduplicated and whitelisted")
     p.add_argument('--whitelist-limit', help="specify how many whitelist results to use when applying to --feeds "
                                              "[default %(default)s]", default=WHITELIST_LIMIT)
+    p.add_argument('--whitelist-confidence', help='by confidence (greater-than or equal to) [default: %(default)s]',
+                   default=WHITELIST_CONFIDENCE)
+
     p.add_argument('--last-day', action="store_true", help='auto-sets reporttime to 23 hours and 59 seconds ago '
                                                            '(current time UTC) and reporttime-end to "now"')
     p.add_argument('--days', help='filter results within last X days')
@@ -363,6 +366,7 @@ def main():
         if options.get('feed'):
             wl_filters = copy.deepcopy(filters)
             wl_filters['tags'] = 'whitelist'
+            wl_filters['confidence'] = args.whitelist_confidence
 
             now = arrow.utcnow()
             now = now.replace(days=-3)
