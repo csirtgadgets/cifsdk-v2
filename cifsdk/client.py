@@ -60,7 +60,7 @@ class Client(object):
 
         self.nowait = nowait
     
-    def search(self, query=None, filters={}, limit=None, nolog=None, sort='lasttime', decode=True):
+    def search(self, query=None, filters={}, limit=None, nolog=None, sort='lasttime', sort_direction='ASC', decode=True):
         """returns search result set based on either query or filters
 
         :param query: a single observable (ex: example.com, 192.168.1.1, ...)
@@ -111,7 +111,10 @@ class Client(object):
             ret = json.loads(ret)
 
             self.logger.info('sorting...')
-            ret = sorted(ret, key=lambda o: o[sort])
+            if sort_direction == 'DESC':
+                ret = sorted(ret, key=lambda o: o[sort], reverse=True)
+            else:
+                ret = sorted(ret, key=lambda o: o[sort])
 
         self.logger.debug('returning..')
         return ret
@@ -214,7 +217,8 @@ def main():
     p.add_argument('-C', '--config',  help="configuration file [default: %(default)s]",
                    default=os.path.expanduser("~/.cif.yml"))
 
-    p.add_argument('--sort', help='sort output ASC by key', default='reporttime')
+    p.add_argument('--sortby', help='sort output [default: %(default)s]', default='lasttime')
+    p.add_argument('--sortby-direction', help='sortby direction [default: %(default)s]', default='ASC')
     p.add_argument('-f', '--format', help="specify output format [default: %(default)s]", default="table")
 
     # actions
@@ -350,7 +354,8 @@ def main():
                 now = now.replace(days=-3)
                 filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
-        ret = cli.search(limit=mylimit, nolog=options['nolog'], filters=filters, sort=options.get('sort'))
+        ret = cli.search(limit=mylimit, nolog=options['nolog'], filters=filters, sort=options['sortby'],
+                         sort_direction=options['sortby_direction'])
 
         if options.get('aggregate'):
             ret = cli.aggregate(ret, field=options['aggregate'])
