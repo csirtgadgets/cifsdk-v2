@@ -34,6 +34,8 @@ def test_format_snort():
         },
         {
             'observable': "192.168.1.1",
+            'portlist': 8888,
+            'protocol': 6,
             'provider': "me.com",
             'tlp': "amber",
             'confidence': "85",

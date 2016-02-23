@@ -1,7 +1,5 @@
 from cifsdk.format.plugin import Plugin
-import re
 import os
-from pprint import pprint
 
 SID = os.environ.get('CIF_SNORT_SID', 5000000000)
 THRESHOLD = os.environ.get('CIF_SNORT_THRESHOLD', 'type limit,track by_src,count 1,seconds 3600')
@@ -12,6 +10,13 @@ TLP_DEFAULT = os.environ.get('CIF_SNORT_TLP', 'GREEN')
 PRIORITY = os.environ.get('CIF_SNORT_PRIOIRTY', 1)
 CLASSTYPE = os.environ.get('CIF_SNORT_CLASSTYPE', False)
 TAG = os.environ.get('CIF_SNORT_TAG', False)
+
+PROTOCOL_MAP = {
+    '0': 'ICMP',
+    '6': 'TCP',
+    '17': 'UDP'
+}
+
 
 # https://github.com/csirtgadgets/p5-cif-sdk/blob/master/lib/CIF/SDK/Format/Snort.pm
 # https://github.com/csirtgadgets/p5-snort-rule/blob/master/lib/Snort/Rule.pm
@@ -44,14 +49,22 @@ class Snort(Plugin):
         text = []
         sid = SID
         for d in self.data:
+            p = 'IP'
+            if d.get('protocol') and d['protocol'] >= 0:
+                p = PROTOCOL_MAP.get(str(d['protocol']))
+
+            portlist = 'any'
+            if d.get('portlist') and d['portlist'] is not None:
+                porlist = str(d['portlist'])
+
             r = {
                 'action': 'alert',
-                'proto': d.get('protocol', 'IP'),
+                'proto': p,
                 'src': SRC,
                 'sport': 'any',
                 'dir': '->',
                 'dst': d['observable'],
-                'dport': d.get('portlist', 'any'),
+                'dport': portlist,
             }
 
             opts = {
