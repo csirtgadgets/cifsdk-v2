@@ -36,7 +36,9 @@ data = [
 ]
 
 whitelist = [
-    'example.com'
+    {
+        'observable': 'example.com',
+    }
 ]
 
 

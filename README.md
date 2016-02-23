@@ -8,7 +8,7 @@ The CIF  Software Development Kit (SDK) for Python contains library code and exa
 bin/cif command on the server. This SDK is meant to be used as a client interacting with a REMOTE CIF Instance.**
 
 # Installation
- 
+
 ## Ubuntu
   ```bash
   $ sudo apt-get install -y python-dev python-pip git
@@ -24,43 +24,73 @@ bin/cif command on the server. This SDK is meant to be used as a client interact
     remote: https://localhost
     token: 1234
   ```
-### Running
+### Running out of the box
+These plugins are minimal and run out of the box
+
   ```bash
   $ cif --token 1234 --remote 'https://localhost' -q example.com
+  $ cif --token 1234 --remote 'https://localhost' -q example.com --format csv
+  $ cif --token 1234 --remote 'https://localhost' -q example.com --format table
+  $ cif --token 1234 --remote 'https://localhost' -q example.com --format json
   ```
 
+### Running with 3rd party plugins
+These plugins typically require extra [bloated] code, not installed by default
+
+#### STIX
+   ```bash
+   $ pip install stix  # requires many other 3rd party xml bloat
+   $ cif --token 1234 --remote 'https://localhost' -q example.com --format stix
+   ```
+   
 ## API
 ### Search
   ```python
+  import logging
   from cifsdk.client import Client
   from cifsdk.format import Table
 
-  cli = Client(token=1234,
+  LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s[%(lineno)s] - %(message)s'
+  loglevel = logging.INFO
+  console = logging.StreamHandler()
+  logging.getLogger('').setLevel(loglevel)
+  console.setFormatter(logging.Formatter(LOG_FORMAT))
+  logging.getLogger('').addHandler(console)
+
+  cli = Client(token='1234',
                remote='https://localhost',
-               no_verify_ssl=1)
-  
-  
+               verify_ssl=False)
+
+
   ret = cli.search('example.com')
   print Table(ret)
-  
+
   filters = {
     "observable": "example.com",
     "confidence": 35,
   }
-  
+
   ret = cli.search(filters=filters)
   print(Table(ret))
   ```
 
 ### Submit
    ```python
+   import logging
    from cifsdk.client import Client
 
-   d = '{"observable":"example4.com","tlp":"amber","confidence":"85","tags":"malware","provider":"example.com","group":"everyone"}'
+   LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s[%(lineno)s] - %(message)s'
+   loglevel = logging.INFO
+   console = logging.StreamHandler()
+   logging.getLogger('').setLevel(loglevel)
+   console.setFormatter(logging.Formatter(LOG_FORMAT))
+   logging.getLogger('').addHandler(console)
 
-   cli = Client(token=1234,
+   data = '{"observable":"example4.com","tlp":"amber","confidence":"85","tags":"malware","provider":"example.com","group":"everyone"}'
+
+   cli = Client(token='1234',
                remote='https://localhost',
-               no_verify_ssl=1)
+               verify_ssl=False)
 
    ret = cli.submit(data)
    print("submission id: {0}".format(ret))

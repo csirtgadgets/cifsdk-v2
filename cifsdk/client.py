@@ -1,4 +1,4 @@
-import json
+import ujson as json
 import time
 import sys
 import os
@@ -14,9 +14,12 @@ from argparse import RawDescriptionHelpFormatter
 import textwrap
 import copy
 import arrow
+import zlib
+import base64
 
 from cifsdk import VERSION, API_VERSION
-from cifsdk.constants import REMOTE_ADDR, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY, FEED_LIMIT, TOKEN
+from cifsdk.constants import REMOTE_ADDR, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY, FEED_LIMIT, TOKEN, FIELDS
+from cifsdk.constants import PINGS, WHITELIST_CONFIDENCE
 
 # https://urllib3.readthedocs.org/en/latest/security.html#disabling-warnings
 # http://stackoverflow.com/questions/14789631/hide-userwarning-from-urllib2
@@ -57,7 +60,7 @@ class Client(object):
 
         self.nowait = nowait
     
-    def search(self, query=None, filters={}, limit=None, nolog=None, sort='lasttime', decode=True):
+    def search(self, query=None, filters={}, limit=None, nolog=None, sort='lasttime', sort_direction='ASC', decode=True):
         """returns search result set based on either query or filters
 
         :param query: a single observable (ex: example.com, 192.168.1.1, ...)
@@ -70,6 +73,7 @@ class Client(object):
         """
         filters['limit'] = limit
         filters['nolog'] = nolog
+        filters['gzip'] = 1
 
         if query:
             filters['observable'] = query
@@ -92,14 +96,25 @@ class Client(object):
             self.logger.warning('request failed: %s' % str(body.status_code))
             raise SystemExit
 
+        s = (int(body.headers['Content-Length']) / 1024 / 1024)
+        self.logger.info('processing {} megs'.format(s))
+
         ret = body.content
+        if not ret.startswith('['):
+            self.logger.info('trying to decompress...')
+            # http://stackoverflow.com/a/2695575
+            ret = base64.b64decode(ret)
+            ret = zlib.decompress(ret, 16+zlib.MAX_WBITS)
 
         if decode:
             self.logger.info('decoding...')
             ret = json.loads(ret)
 
             self.logger.info('sorting...')
-            ret = sorted(ret, key=lambda o: o[sort])
+            if sort_direction == 'DESC':
+                ret = sorted(ret, key=lambda o: o[sort], reverse=True)
+            else:
+                ret = sorted(ret, key=lambda o: o[sort])
 
         self.logger.debug('returning..')
         return ret
@@ -184,7 +199,7 @@ def main():
     p = ArgumentParser(
         description=textwrap.dedent('''\
         example usage:
-            $ cif --search example.com
+            $ cif --query example.com
             $ cif -q 1.2.3.0/24 --feed --format csv
         '''),
         formatter_class=RawDescriptionHelpFormatter,
@@ -192,33 +207,38 @@ def main():
     )
 
     # options
-    p.add_argument("-v", "--verbose", dest="verbose", action="count", help="set verbosity level [default: %(default)s]")
-    p.add_argument('-d', '--debug', dest='debug', action="store_true")
+    p.add_argument("-v", "--verbose", dest="verbose", action="store_true", help="logging level: INFO")
+    p.add_argument('-d', '--debug', dest='debug', action="store_true", help="logging level: DEBUG")
     p.add_argument('-V', '--version', action='version', version=VERSION)
     p.add_argument('--no-verify-ssl', action="store_true", default=False)
-    p.add_argument('--remote',  help="remote api location")
-    p.add_argument('--token', help="specify token",  default=TOKEN)
+    p.add_argument('-R', '--remote',  help="remote api location")
+    p.add_argument('-T', '--token', help="specify token",  default=TOKEN)
     p.add_argument('--timeout',  help='connection timeout [default: %(default)s]', default="300")
     p.add_argument('-C', '--config',  help="configuration file [default: %(default)s]",
                    default=os.path.expanduser("~/.cif.yml"))
 
-    p.add_argument('--sort', help='sort output ASC by key', default='reporttime')
+    p.add_argument('--sortby', help='sort output [default: %(default)s]', default='lasttime')
+    p.add_argument('--sortby-direction', help='sortby direction [default: %(default)s]', default='ASC')
     p.add_argument('-f', '--format', help="specify output format [default: %(default)s]", default="table")
 
     # actions
     p.add_argument('-p', '--ping', action="store_true", help="ping")
-    p.add_argument('--submit', help="submit json string")
+    p.add_argument('-s', '--submit', action="store_true", help="submit a JSON object")
 
     # flags
-    p.add_argument('--limit', help="result limit")
+    p.add_argument('-l', '--limit', help="result limit")
     p.add_argument('-n', '--nolog', help='do not log the search', default=None, action="store_true")
 
     # filters
     p.add_argument('-q', "--query", help="specify a search")
-    p.add_argument('--firsttime', help='firsttime or later')
-    p.add_argument('--lasttime', help='lasttime or earlier')
-    p.add_argument('--reporttime', help='TODO')
-    p.add_argument('--reporttimeend', help='TODO')
+    p.add_argument('--firsttime', help='specify filter based on firsttime timestmap (greater than, '
+                                       'format: YYYY-MM-DDTHH:MM:SSZ)')
+    p.add_argument('--lasttime', help='specify filter based on lasttime timestamp (less than, format: '
+                                      'YYYY-MM-DDTHH:MM:SSZ)')
+    p.add_argument('--reporttime', help='specify filter based on reporttime timestmap (greater than, format: '
+                                        'YYYY-MM-DDTHH:MM:SSZ)')
+    p.add_argument('--reporttimeend', help='specify filter based on reporttime timestmap (less than, format: '
+                                           'YYYY-MM-DDTHH:MM:SSZ)')
     p.add_argument("--tags", help="filter for tags")
     p.add_argument('--description', help='filter on description')
     p.add_argument('--otype', help='filter by otype')
@@ -227,15 +247,30 @@ def main():
     p.add_argument('--rdata', help='filter by rdata')
     p.add_argument('--provider', help='filter by provider')
     p.add_argument('--asn', help='filter by asn')
+    p.add_argument('--tlp', help='filter by tlp')
     p.add_argument('--proxy', help="specify a proxy to use [default %(default)s]", default=PROXY)
 
-    p.add_argument('--feed', action="store_true", help="aggregate results into a feed based on the observable")
+    p.add_argument('--feed', action="store_true", help="generate a feed of data, meaning deduplicated and whitelisted")
     p.add_argument('--whitelist-limit', help="specify how many whitelist results to use when applying to --feeds "
                                              "[default %(default)s]", default=WHITELIST_LIMIT)
-    p.add_argument('--last-day', action="store_true", help='filter results by last 24hrs')
+    p.add_argument('--whitelist-confidence', help='by confidence (greater-than or equal to) [default: %(default)s]',
+                   default=WHITELIST_CONFIDENCE)
+
+    p.add_argument('--last-day', action="store_true", help='auto-sets reporttime to 23 hours and 59 seconds ago '
+                                                           '(current time UTC) and reporttime-end to "now"')
+    p.add_argument('--last-hour', action='store_true', help='auto-sets reporttime to the beginning of the previous full'
+                                                            ' hour and reporttime-end to end of previous full hour')
     p.add_argument('--days', help='filter results within last X days')
+    p.add_argument('--today', help='auto-sets reporttime to today, 00:00:00Z (UTC)', action='store_true')
 
     p.add_argument('--aggregate', help="aggregate around a specific field (ie: observable)")
+
+    p.add_argument('--fields', help="specify field list to display [default: %(default)s]", default=','.join(FIELDS))
+    p.add_argument('--filename', help='specify output filename [default: STDOUT]')
+    p.add_argument('--ttl', help='specify number of pings to send [default: %(default)s]', default=PINGS)
+    p.add_argument('--group', help='filter by group(s) (everyone,group1,group2,...)')
+    p.add_argument('--application', help='filter based on application field')
+    p.add_argument('--id', help='specify an id to retrieve')
 
     # Process arguments
     args = p.parse_args()
@@ -257,114 +292,159 @@ def main():
 
     cli = Client(options['token'], remote=options['remote'], proxy=options.get('proxy'), verify_ssl=verify_ssl)
 
-    try:
-        if(options.get('search') or options.get('tags') or options.get('cc') or options.get('rdata') or options.get(
+    if(options.get('query') or options.get('tags') or options.get('cc') or options.get('rdata') or options.get(
                 'otype') or options.get('provider') or options.get('asn') or options.get('description')):
-            filters = {}
-            if options.get('search'):
-                filters['observable'] = options['search']
-            if options.get('cc'):
-                filters['cc'] = options['cc']
+        filters = {}
+        if options.get('query'):
+            filters['observable'] = options['query']
+        if options.get('cc'):
+            filters['cc'] = options['cc']
 
-            if options.get('tags'):
-                filters['tags'] = options['tags']
+        if options.get('tags'):
+            filters['tags'] = options['tags']
 
-            if options.get('description'):
-                filters['description'] = options['description']
+        if options.get('description'):
+            filters['description'] = options['description']
 
-            if options.get('confidence'):
-                filters['confidence'] = options['confidence']
-            else:
-                if options.get('feed'):
-                    filters['confidence'] = FEED_CONFIDENCE
-
-            if options.get('firsttime'):
-                filters['firsttime'] = options['firsttime']
-
-            if options.get('lasttime'):
-                filters['lasttime'] = options['lasttime']
-
-            if options.get('reporttime'):
-                filters['reporttime'] = options['reporttime']
-
-            if options.get('reporttimeend'):
-                filters['reporttimeend'] = options['reporttimeend']
-
-            if options.get('otype'):
-                filters['otype'] = options['otype']
-
-            if options.get('rdata'):
-                filters['rdata'] = options['rdata']
-
-            if options.get('nolog'):
-                options['nolog'] = 1
-
-            if options.get('provider'):
-                filters['provider'] = options['provider']
-
-            if options.get('asn'):
-                filters['asn'] = options['asn']
-
-            if options.get('last_day'):
-                now = arrow.utcnow()
-                filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
-                now = now.replace(days=-1)
-                filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
-
-            if options.get('days'):
-                now = arrow.utcnow()
-                filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
-                now = now.replace(days=-int(options['days']))
-                filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
-
-            mylimit = options.get('limit', LIMIT)
-            if options.get('feed'):
-                limit = FEED_LIMIT
-
-            ret = cli.search(limit=mylimit, nolog=options['nolog'], filters=filters, sort=options.get('sort'))
-
-            if options.get('aggregate'):
-                ret = cli.aggregate(ret, field=options['aggregate'])
-
-            if options.get('feed'):
-                wl_filters = copy.deepcopy(filters)
-                wl_filters['tags'] = 'whitelist'
-
-                wl = cli.search(limit=options['whitelist_limit'], nolog=True, filters=wl_filters)
-
-                f = feed_factory(options['otype'])
-                ret = cli.aggregate(ret)
-
-                ret = f().process(ret, wl)
-
-            f = format_factory(options['format'])
-
-            try:
-                print(f(ret))
-            except AttributeError as e:
-                logger.exception(e)
-
-        elif options.get('ping'):
-            for num in range(0,4):
-                ret = cli.ping()
-                print("roundtrip: %s ms" % ret)
-                select.select([], [], [], 1)
-        elif options.get('submit'):
-            ret = cli.submit(options["submit"])
-            f = format_factory(options['format'])
-
-            try:
-                print(f(ret))
-            except AttributeError as e:
-                logger.exception(e)
+        if options.get('confidence'):
+            filters['confidence'] = options['confidence']
         else:
-            logger.warning('operation not supported')
+            if options.get('feed'):
+                filters['confidence'] = FEED_CONFIDENCE
+
+        if options.get('firsttime'):
+            filters['firsttime'] = options['firsttime']
+
+        if options.get('lasttime'):
+            filters['lasttime'] = options['lasttime']
+
+        if options.get('reporttime'):
+            filters['reporttime'] = options['reporttime']
+
+        if options.get('reporttimeend'):
+            filters['reporttimeend'] = options['reporttimeend']
+
+        if options.get('otype'):
+            filters['otype'] = options['otype']
+
+        if options.get('rdata'):
+            filters['rdata'] = options['rdata']
+
+        if options.get('nolog'):
+            options['nolog'] = 1
+
+        if options.get('provider'):
+            filters['provider'] = options['provider']
+
+        if options.get('asn'):
+            filters['asn'] = options['asn']
+
+        if options.get('tlp'):
+            filters['tlp'] = options['tlp']
+
+        if options.get('group'):
+            filters['group'] = options['group']
+
+        if options.get('application'):
+            filters['application'] = options['application']
+
+        if options.get('id'):
+            filters['id'] = options['id']
+
+        # needs to be MEG'd out.
+        if options.get('last_day'):
+            now = arrow.utcnow()
+            filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+            now = now.replace(days=-1)
+            filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+        elif options.get('last_hour'):
+            now = arrow.utcnow()
+            filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+            now = now.replace(hours=-1)
+            filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+        elif options.get('today'):
+            now = arrow.utcnow()
+            filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDT00:00:00'))
+
+        if options.get('days'):
+            now = arrow.utcnow()
+            filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+            now = now.replace(days=-int(options['days']))
+            filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+
+        mylimit = options.get('limit', LIMIT)
+        if options.get('feed'):
+            limit = FEED_LIMIT
+            if not options.get('days'):
+                now = arrow.utcnow()
+                filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+                now = now.replace(days=-3)
+                filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+
+        ret = cli.search(limit=mylimit, nolog=options['nolog'], filters=filters, sort=options['sortby'],
+                         sort_direction=options['sortby_direction'])
+
+        if options.get('aggregate'):
+            ret = cli.aggregate(ret, field=options['aggregate'])
+
+        if options.get('feed'):
+            wl_filters = copy.deepcopy(filters)
+            wl_filters['tags'] = 'whitelist'
+            wl_filters['confidence'] = args.whitelist_confidence
+
+            now = arrow.utcnow()
+            now = now.replace(days=-3)
+            wl_filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+
+            wl = cli.search(limit=options['whitelist_limit'], nolog=True, filters=wl_filters)
+
+            f = feed_factory(options['otype'])
+            ret = cli.aggregate(ret)
+
+            ret = f().process(ret, wl)
+
+        f = format_factory(options['format'])
+
+        try:
+            if len(ret) >= 1:
+                ret = f(ret, cols=options['fields'].split(','))
+                if args.filename:
+                    with open(args.filename, 'w') as F:
+                        F.write(str(ret))
+                else:
+                    print(ret)
+            else:
+                logger.info("no results found...")
+        except AttributeError as e:
+            logger.exception(e)
+
+    elif options.get('ping'):
+        for num in range(0, args.ttl):
+            ret = cli.ping()
+            print("roundtrip: %s ms" % ret)
+            select.select([], [], [], 1)
+    elif options.get('submit'):
+
+        if not sys.stdin.isatty():
+            stdin = sys.stdin.read()
+        else:
+            logger.error("No data passed via STDIN")
             raise SystemExit
 
-    except KeyboardInterrupt:
-        raise SystemExit
-    except Exception as e:
-        logger.error(e)
+        try:
+            data = json.loads(stdin)
+            try:
+                ret = cli.submit(data)
+                print('submitted: {0}'.format(ret))
+            except Exception as e:
+                logger.error(e)
+                raise SystemExit
+        except Exception as e:
+            logger.error(e)
+            raise SystemExit
+    else:
+        logger.warning('operation not supported')
+        p.print_help()
         raise SystemExit
 
 if __name__ == "__main__":

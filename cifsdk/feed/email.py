@@ -1,27 +1,7 @@
-
-from pprint import pprint
-
-PERM_WHITELIST = [
-    'google.com',
-    'yahoo.com',
-    'facebook.com',
-    'youtube.com',
-    'netflix.com',
-    'baidu.com',
-    'wikipedia.org',
-    'twitter.com',
-    'qq.com',
-    'taobao.com',
-    'amazon.com',
-    'live.com',
-    'bing.com',
-    'wordpress.com',
-    'msn.com',
-    'update.symantec.com',
-]
+PERM_WHITELIST = []
 
 
-class Fqdn(object):
+class Email(object):
 
     def __init__(self):
         self.wl = set()

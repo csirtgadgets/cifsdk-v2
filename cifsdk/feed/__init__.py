@@ -2,12 +2,14 @@ from cifsdk.feed.fqdn import Fqdn
 from cifsdk.feed.ipv4 import Ipv4
 from cifsdk.feed.ipv6 import Ipv6
 from cifsdk.feed.url import Url
+from cifsdk.feed.email import Email
 
 plugins = {
     'ipv4': Ipv4,
     'ipv6': Ipv6,
     'fqdn': Fqdn,
-    'url': Url
+    'url': Url,
+    'email': Email,
 }
 
 

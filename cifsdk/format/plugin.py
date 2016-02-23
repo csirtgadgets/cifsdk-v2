@@ -1,11 +1,10 @@
-COLUMNS = ['tlp', 'reporttime', 'observable', 'otype', 'cc', 'asn', 'asn_desc', 'confidence', 'description', 'tags',
-           'rdata', 'provider']
+from cifsdk.constants import FIELDS
 MAX_FIELD_SIZE = 30
 
 
 class Plugin(object):
 
-    def __init__(self, data=[], cols=COLUMNS, max_field_size=MAX_FIELD_SIZE):
+    def __init__(self, data=[], cols=FIELDS, max_field_size=MAX_FIELD_SIZE):
         self.cols = cols
         self.max_field_size = max_field_size
         self.data = data

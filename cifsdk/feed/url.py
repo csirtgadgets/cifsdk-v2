@@ -1,4 +1,8 @@
-#from cifsdk.feed import tag_contains_whitelist
+
+def tag_contains_whitelist(data):
+    for d in data:
+        if d == 'whitelist':
+            return True
 
 
 class Url(object):
@@ -7,18 +11,17 @@ class Url(object):
         pass
 
     def process(self, data, whitelist):
-
         wl = set()
         for x in whitelist:
-            wl.add(x)
+            wl.add(x['observable'])
 
-        rv = set()
+        rv = []
         for x in data:
             if tag_contains_whitelist(x['tags']):
                 continue
 
-            if x not in wl:
-                rv.add(x)
+            if x['observable'] not in wl:
+                rv.append(x)
 
         return rv
 
