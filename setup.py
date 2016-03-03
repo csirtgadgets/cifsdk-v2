@@ -11,6 +11,16 @@ versioneer.versionfile_build = 'cifsdk/_version.py'
 versioneer.tag_prefix = ''  # tags are like 1.2.0
 versioneer.parentdir_prefix = 'py-cifsdk-'  # dirname like 'myproject-1.2.0'
 
+cmds = [
+    "cif=cifsdk.client:main",
+]
+
+try:
+    import cgmail
+    cmds.append('cgmail-cif=cifsdk.cifcgmail:main')
+except ImportError:
+    pass
+
 setup(
     name="py-cifsdk",
     version=versioneer.get_version(),
@@ -32,9 +42,7 @@ setup(
     packages=find_packages(),
     install_requires=reqs,
     entry_points={
-          'console_scripts': [
-              "cif=cifsdk.client:main",
-              ]
+          'console_scripts': cmds
       },
     test_suite="test"
 )

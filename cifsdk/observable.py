@@ -101,7 +101,6 @@ class Observable(object):
         return False
 
     def resolve_obj(self, observable):
-        pprint(observable)
         def _ipv4(s):
             if RE_IPV4.match(s):
                 return 1
