@@ -82,6 +82,9 @@ class Client(object):
 
         if filters.get('tags') and type(filters.get('tags')) is list:
             filters['tags'] = ','.join(filters['tags'])
+
+        if filters.get('cc'):
+            filters['cc'] = filters['cc'].lower()
             
         self.logger.debug('uri: %s' % uri)
         self.logger.debug('params: %s', json.dumps(filters))
