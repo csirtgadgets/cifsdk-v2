@@ -23,7 +23,9 @@ class Csv(Plugin):
                     y = ','.join(y)
                 if type(y) == int:
                     y = str(y)
-
+                if type(y) == float:
+                    y = str(y)
+                    
                 y = (y[:self.max_field_size] + '..') if len(y) > self.max_field_size else y
                 r.append(y.encode('utf-8'))
             cw.writerow(r)
