@@ -12,7 +12,7 @@ bin/cif command on the server. This SDK is meant to be used as a client interact
 ## Ubuntu
   ```bash
   $ sudo apt-get install -y python-dev python-pip git
-  $ pip install git+https://github.com/csirtgadgets/py-cifsdk
+  $ pip install git+https://github.com/csirtgadgets/cif-sdk-py
   ```
 
 # Examples
