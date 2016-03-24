@@ -24,7 +24,7 @@ PROXY = os.environ.get('CIF_PROXY')
 TOKEN = os.environ.get('CIF_TOKEN')
 
 FIELDS = ['tlp', 'group', 'lasttime', 'reporttime', 'observable', 'otype', 'cc', 'asn', 'asn_desc', 'confidence', 'description',
-          'tags', 'rdata', 'provider']
+          'tags', 'rdata', 'rtype', 'provider', 'altid', 'altid_tlp']
 FIELDS = os.environ.get('CIF_FIELDS', FIELDS)
 
 PINGS=4
