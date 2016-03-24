@@ -28,7 +28,7 @@ except ImportError:
     pass
 
 setup(
-    name="py-cifsdk",
+    name="cif-sdk-py",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     description="CIF Python SDK",
