@@ -21,6 +21,12 @@ try:
 except ImportError:
     pass
 
+try:
+    import elasticsearch
+    cmds.append('cif-es-reindex=cifsdk.extras.cif-es-reindex:main')
+except ImportError:
+    pass
+
 setup(
     name="py-cifsdk",
     version=versioneer.get_version(),
