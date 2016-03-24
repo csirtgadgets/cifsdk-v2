@@ -27,7 +27,7 @@ setup(
     cmdclass=versioneer.get_cmdclass(),
     description="CIF Python SDK",
     long_description="CIF Software Development Kit for Python",
-    url="https://github.com/csirtgadgets/py-cifsdk",
+    url="https://github.com/csirtgadgets/cif-sdk-py",
     license='LGPL3',
     classifiers=[
        "Topic :: System :: Networking",
