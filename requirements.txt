@@ -4,5 +4,5 @@ prettytable==0.7.2
 PyYAML==3.11
 tailer==0.3
 arrow==0.6.0
-pytest==2.7.0
+pytest>=2.7.0
 ujson==1.34
