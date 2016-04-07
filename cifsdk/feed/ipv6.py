@@ -1,4 +1,3 @@
-#from cifsdk.feed import tag_contains_whitelist
 import pytricia
 import logging
 from pprint import pprint
@@ -12,26 +11,34 @@ PERM_WHITELIST = [
 ]
 
 
+def tag_contains_whitelist(data):
+    for d in data:
+        if d == 'whitelist':
+            return True
+
+
 class Ipv6(object):
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)
         pass
 
-    # https://github.com/jsommers/pytricia
-    # https://github.com/fnl/patricia-trie/blob/master/patricia.py
-    def process(self, data, whitelist):
-        raise RuntimeError('https://github.com/jsommers/pytricia/issues/6')
-        print('setting up trie')
+    def process(self, data, whitelist=[]):
         wl = pytricia.PyTricia()
 
-        print('adding perm whitelist')
         [wl.insert(x, True) for x in PERM_WHITELIST]
 
-        print('adding submitted whitelist')
-        [wl.insert(y, True) for y in whitelist]
+        [wl.insert(str(y['observable']), True) for y in whitelist]
 
-        return (y for y in data if y not in wl)
+        rv = []
+        for y in data:
+            if tag_contains_whitelist(y['tags']):
+                continue
+
+            if str(y['observable']) not in wl:
+                rv.append(y)
+
+        return rv
 
 
 
