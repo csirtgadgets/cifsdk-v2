@@ -22,6 +22,18 @@ def tag_contains_whitelist(data):
             return True
 
 
+def _normalize(i):
+    bits = i.split('.')
+
+    rv = []
+    for b in bits:
+        if len(b) > 1 and b.startswith('0') and not b.startswith('0/'):
+            b = b[1:]
+        rv.append(b)
+
+    return '.'.join(rv)
+
+
 class Ipv4(object):
 
     def __init__(self):
@@ -46,6 +58,7 @@ class Ipv4(object):
             if tag_contains_whitelist(y['tags']):
                 continue
 
+            y['observable'] = _normalize(y['observable'])
             if str(y['observable']) not in wl:
                 rv.append(y)
 
