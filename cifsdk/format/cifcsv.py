@@ -14,7 +14,7 @@ class Csv(Plugin):
 
     def __repr__(self):
         si = StringIO()
-        cw = csv.writer(si)
+        cw = csv.writer(si, quoting=csv.QUOTE_ALL)
         for obs in self.data:
             r = []
             for c in self.cols:
@@ -25,8 +25,7 @@ class Csv(Plugin):
                     y = str(y)
                 if type(y) == float:
                     y = str(y)
-                    
-                y = (y[:self.max_field_size] + '..') if len(y) > self.max_field_size else y
+
                 r.append(y.encode('utf-8'))
             cw.writerow(r)
         return si.getvalue().strip('\r\n')
