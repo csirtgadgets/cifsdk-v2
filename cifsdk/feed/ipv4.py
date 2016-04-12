@@ -46,7 +46,7 @@ class Ipv4(object):
             wl[x] = True
 
         for y in whitelist:
-            y = str(y['observable'])
+            y = str(_normalize(y['observable']))
             if not '/' in y: # weird bug work-around it'll insert 172.16.1.60 with a /0 at the end??
                 y = '{}/32'.format(y)
             wl[y] = True
