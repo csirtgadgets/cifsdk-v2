@@ -16,7 +16,7 @@ import re
 from cifsdk import VERSION
 from cifsdk.utils import setup_logging
 
-CONFIDENCE = 50
+CONFIDENCE = 0
 MONTHS = 12
 
 from pprint import pprint
@@ -55,6 +55,7 @@ def main():
 
     # get list of dailies
     dailies = es.indices.get_aliases(index='{}-*.*.*'.format(args.index_prefix)).keys()  # daily indices only
+
     to_cull = {}
     for d in dailies:
         match = re.search(r"^cif\.observables\-((\d{4}\.\d{2})\.\d{2})$", d)
