@@ -396,7 +396,7 @@ def main():
             wl_filters['tags'] = 'whitelist'
             wl_filters['confidence'] = args.whitelist_confidence
 
-            now = arrow.utcn    ow()
+            now = arrow.utcnow()
             now = now.replace(days=-DAYS)
             wl_filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
