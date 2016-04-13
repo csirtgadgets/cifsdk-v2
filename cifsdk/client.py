@@ -375,13 +375,14 @@ def main():
             now = now.replace(days=-int(options['days']))
             filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
+        DAYS=30
         mylimit = options.get('limit', LIMIT)
         if options.get('feed'):
-            limit = FEED_LIMIT
+            mylimit = FEED_LIMIT
             if not options.get('days'):
                 now = arrow.utcnow()
                 filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
-                now = now.replace(days=-3)
+                now = now.replace(days=-DAYS)
                 filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
         ret = cli.search(limit=mylimit, nolog=options['nolog'], filters=filters, sort=options['sortby'],
@@ -395,8 +396,8 @@ def main():
             wl_filters['tags'] = 'whitelist'
             wl_filters['confidence'] = args.whitelist_confidence
 
-            now = arrow.utcnow()
-            now = now.replace(days=-3)
+            now = arrow.utcn    ow()
+            now = now.replace(days=-DAYS)
             wl_filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
             wl = cli.search(limit=options['whitelist_limit'], nolog=True, filters=wl_filters)
