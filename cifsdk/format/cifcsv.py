@@ -15,6 +15,7 @@ class Csv(Plugin):
     def __repr__(self):
         si = StringIO()
         cw = csv.writer(si, quoting=csv.QUOTE_ALL)
+        cw.writerow(self.cols)
         for obs in self.data:
             r = []
             for c in self.cols:
