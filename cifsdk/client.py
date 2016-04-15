@@ -229,7 +229,7 @@ def main():
     p.add_argument('-s', '--submit', action="store_true", help="submit a JSON object")
 
     # flags
-    p.add_argument('-l', '--limit', help="result limit")
+    p.add_argument('-l', '--limit', help="result limit", default=LIMIT)
     p.add_argument('-n', '--nolog', help='do not log the search', default=None, action="store_true")
 
     # filters
@@ -376,17 +376,23 @@ def main():
             filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
         DAYS=30
-        mylimit = options.get('limit', LIMIT)
+
         if options.get('feed'):
-            mylimit = FEED_LIMIT
+            if options['limit'] == LIMIT:
+                options['limit'] = FEED_LIMIT
+
             if not options.get('days'):
                 now = arrow.utcnow()
                 filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
                 now = now.replace(days=-DAYS)
                 filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
-        ret = cli.search(limit=mylimit, nolog=options['nolog'], filters=filters, sort=options['sortby'],
+        ret = cli.search(limit=options['limit'], nolog=options['nolog'], filters=filters, sort=options['sortby'],
                          sort_direction=options['sortby_direction'])
+
+        number_returned = len(ret)
+
+        logger.info('returned: {} records'.format(number_returned))
 
         if options.get('aggregate'):
             ret = cli.aggregate(ret, field=options['aggregate'])
@@ -404,6 +410,9 @@ def main():
 
             f = feed_factory(options['otype'])
             ret = cli.aggregate(ret)
+
+            if len(ret) != number_returned:
+                logger.info('aggregation removed: {} records'.format(number_returned - len(ret)))
 
             ret = f().process(ret, wl)
 
