@@ -1,5 +1,9 @@
 
 import pytricia
+import logging
+import ipaddress
+
+logger = logging.getLogger(__name__)
 
 from pprint import pprint
 
@@ -14,6 +18,8 @@ PERM_WHITELIST = [
     "240.0.0.0/5",
     "248.0.0.0/5",
 ]
+
+LARGEST_PREFIX = '8'
 
 
 def tag_contains_whitelist(data):
@@ -32,7 +38,6 @@ def _normalize(i):
         rv.append(b)
 
     return '.'.join(rv)
-
 
 class Ipv4(object):
 
@@ -59,8 +64,13 @@ class Ipv4(object):
                 continue
 
             y['observable'] = _normalize(y['observable'])
-            if str(y['observable']) not in wl:
-                rv.append(y)
+            try:
+                ipaddress.ip_network(unicode(y['observable']))
+                if str(y['observable']) not in wl:
+                    rv.append(y)
+            except ValueError as e:
+                print(e)
+                print('skipping invalid address: %s' % y['observable'])
 
         return rv
 
