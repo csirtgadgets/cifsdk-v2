@@ -6,3 +6,4 @@ tailer==0.3
 arrow==0.6.0
 pytest>=2.7.0
 ujson==1.34
+ipaddress>=1.0.16
