@@ -3,8 +3,6 @@ import pytricia
 import logging
 import ipaddress
 
-logger = logging.getLogger(__name__)
-
 from pprint import pprint
 
 PERM_WHITELIST = [
@@ -38,6 +36,7 @@ def _normalize(i):
         rv.append(b)
 
     return '.'.join(rv)
+
 
 class Ipv4(object):
 
