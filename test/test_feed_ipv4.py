@@ -25,6 +25,14 @@ data = [
         'observable': '184.168.047.225/32',
         'tags': 'scanner'
     },
+    {
+        'observable': '1.0.0.0/1',
+        'tags': 'hijacked'
+    },
+    {
+        'observable': '1.0.0.0/8',
+        'tags': 'hijacked'
+    }
 ]
 
 whitelist = [
@@ -49,3 +57,7 @@ def test_feed_ipv4_whitelist():
     assert '192.168.1.1' not in s
     assert '192.168.1.1' not in s
     assert '128.205.1.1' in s
+
+    assert '1.0.0.0/1' not in s
+
+    assert '1.0.0.0/8' in s
