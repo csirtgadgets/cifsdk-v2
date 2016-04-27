@@ -11,6 +11,7 @@ from cifsdk.feed import factory as feed_factory
 
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
+from signal import signal, SIGPIPE, SIG_DFL
 import textwrap
 import copy
 import arrow
@@ -425,6 +426,7 @@ def main():
                     with open(args.filename, 'w') as F:
                         F.write(str(ret))
                 else:
+                    signal(SIGPIPE, SIG_DFL)
                     print(ret)
             else:
                 logger.info("no results found...")
