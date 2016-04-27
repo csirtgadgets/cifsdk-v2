@@ -410,6 +410,7 @@ def main():
             wl = cli.search(limit=options['whitelist_limit'], nolog=True, filters=wl_filters)
 
             f = feed_factory(options['otype'])
+
             ret = cli.aggregate(ret)
 
             if len(ret) != number_returned:
@@ -418,6 +419,8 @@ def main():
             ret = f().process(ret, wl)
 
         f = format_factory(options['format'])
+        if f is None:
+            raise SystemError('{} format not supported, maybe missing a dependency.'.format(options['format']))
 
         try:
             if len(ret) >= 1:
