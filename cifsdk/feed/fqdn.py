@@ -30,8 +30,9 @@ class Fqdn(object):
 
     def match_whitelist(self, wl, d):
         bits = d.split('.')
+        bits2 = list(bits)
 
-        for i, b in enumerate(bits):
+        for i, b in enumerate(bits2):
             if '.'.join(bits) in wl:
                 return True
             bits.pop(0)
