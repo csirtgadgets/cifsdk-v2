@@ -33,11 +33,18 @@ data = [
         'observable': 'evil.org',
         'tags': 'scanner'
     },
+    {
+        'observable': 'gmail-smtp-in.l.google.com',
+        'tags': 'malware'
+    }
 ]
 
 whitelist = [
     {
         'observable': 'example.com',
+    },
+    {
+        'observable': 'google.com',
     }
 ]
 
@@ -61,3 +68,5 @@ def test_feed_fqdn_whitelist():
     assert 'test.amazon.com' not in s
     assert 'amazon.com' not in s
     assert 'evil.org' in s
+
+    assert 'gmail-smtp-in.l.google.com' not in s
