@@ -78,6 +78,10 @@ class Client(object):
 
         if query:
             filters['observable'] = query
+
+        if filters.get('observable'):
+            filters['observable'] = filters['observable'].lower()
+            filters['observable'] = filters['observable'].rstrip('/')
         
         uri = self.remote + '/observables'
 
