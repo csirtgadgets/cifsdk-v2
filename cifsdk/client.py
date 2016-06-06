@@ -206,9 +206,25 @@ def main():
 
     p = ArgumentParser(
         description=textwrap.dedent('''\
-        example usage:
-            $ cif --query example.com
-            $ cif -q 1.2.3.0/24 --feed --format csv
+        Example usage:
+
+            $ cif -q 130.201.0.2
+            $ cif -q 130.201.0.0/16
+            $ cif -q 2001:4860:4860::8888
+            $ cif -q example.com
+            $ cif -q 'http://www.example.com'
+            $ cif -q 'john@example.com'
+            $ cif -q bf9d457bcd702fe836201df1b48c0bec
+
+            $ cif --tags botnet,zeus -c 85
+            $ cif --application vnc,ssh --asns 1234 --cc RU,US
+            $ cif -q example.com --tags botnet,zeus -c 85 --limit 50
+
+            $ cif --otype ipv4 --aggregate observable --today
+
+            $ cif --feed --otype ipv4 -c 85 -f csv
+            $ cif --feed --otype fqdn -c 95 --tags botnet -f csv
+            $ cif --feed --otype url -c 75 --today -f csv
         '''),
         formatter_class=RawDescriptionHelpFormatter,
         prog='cif'
