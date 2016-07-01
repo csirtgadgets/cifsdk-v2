@@ -27,7 +27,7 @@ class Table(Plugin):
                     pass
 
                 y = str(y)
-                y = (y[:self.max_field_size] + '..') if len(y) > self.max_field_size else y
+                y = (y[:self.max_field_size] + '..') if (c != 'altid' and len(y) > self.max_field_size) else y
                 r.append(y)
             t.add_row(r)
         return str(t)
