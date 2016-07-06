@@ -15,10 +15,11 @@ bin/cif command on the server. This SDK is meant to be used as a client interact
   $ pip install git+https://github.com/csirtgadgets/cif-sdk-py
   ```
 ## CentOS v 7
+  ```bash
   $ yum -y update
   $ sudo rpm -iUvh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
   $ sudo yum install -y gcc python-pip python-devel git libffi-devel openssl-devel
-  
+  ```
 # Examples
 ## Client
 ### Config
