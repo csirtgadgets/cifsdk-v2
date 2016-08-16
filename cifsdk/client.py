@@ -112,11 +112,18 @@ class Client(object):
             self.logger.info('trying to decompress...')
             # http://stackoverflow.com/a/2695575
             ret = base64.b64decode(ret)
-            ret = zlib.decompress(ret, 16+zlib.MAX_WBITS)
+            try:
+                ret = zlib.decompress(ret)
+            except zlib.error as e:
+                # v2 gzip style
+                ret = zlib.decompress(ret, 16+zlib.MAX_WBITS)
 
         if decode:
             self.logger.info('decoding...')
             ret = json.loads(ret)
+
+            if type(ret) == dict and ret.get('data'):
+                ret = ret['data']
 
             self.logger.info('sorting...')
             if sort_direction == 'DESC':
