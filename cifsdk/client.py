@@ -191,7 +191,7 @@ class Client(object):
         self.logger.debug('return time: %.15f' % t1)
         return t1
 
-    def aggregate(self, data, field='observable', sort='confidence'):
+    def aggregate(self, data, field='observable', sort='confidence', sort_secondary='reporttime'):
         """
         aggregate data
         :param data:
@@ -206,6 +206,7 @@ class Client(object):
                 x.add(d[field])
                 rv.append(d)
 
+        rv = sorted(rv, key=lambda x: x[sort_secondary])
         return rv
 
 
