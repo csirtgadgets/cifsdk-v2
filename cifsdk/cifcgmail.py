@@ -154,14 +154,14 @@ def main():
             'confidence': 25,
         }
         now = arrow.utcnow()
-        filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+        filters['reporttimeend'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
         now = now.replace(days=-7)
-        filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+        filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
         ret = cli.search(limit=50000, filters=filters, sort='reporttime', sort_direction='desc')
         with open(args.cache, 'w') as f:
             for r in ret:
-                f.write("{}\n".format(r['observable']))
+                f.write("{0}\n".format(r['observable']))
 
     update_cache = True
     if os.path.isfile(args.blacklist_cache):
@@ -176,14 +176,14 @@ def main():
             'confidence': 75,
         }
         now = arrow.utcnow()
-        filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+        filters['reporttimeend'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
         now = now.replace(days=-7)
-        filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+        filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
         ret = cli.search(limit=50000, filters=filters, sort='reporttime', sort_direction='desc')
         with open(args.blacklist_cache, 'w') as f:
             for r in ret:
-                f.write("{}\n".format(r['observable']))
+                f.write("{0}\n".format(r['observable']))
 
     fqdns = set()
     with open(args.cache) as f:
@@ -230,8 +230,6 @@ def main():
 
         o = o.__dict__
         del o['logger']
-
-        pprint(o)
 
         if options.get('raw'):
             o.raw = email
