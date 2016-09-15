@@ -105,7 +105,7 @@ class Client(object):
             raise SystemExit
 
         s = (int(body.headers['Content-Length']) / 1024 / 1024)
-        self.logger.info('processing {} megs'.format(s))
+        self.logger.info('processing {0} megs'.format(s))
 
         ret = body.content
         if not ret.startswith('['):
@@ -386,23 +386,23 @@ def main():
         # needs to be MEG'd out.
         if options.get('last_day'):
             now = arrow.utcnow()
-            filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+            filters['reporttimeend'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
             now = now.replace(days=-1)
-            filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+            filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
         elif options.get('last_hour'):
             now = arrow.utcnow()
-            filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+            filters['reporttimeend'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
             now = now.replace(hours=-1)
-            filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+            filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
         elif options.get('today'):
             now = arrow.utcnow()
-            filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDT00:00:00'))
+            filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDT00:00:00'))
 
         if options.get('days'):
             now = arrow.utcnow()
-            filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+            filters['reporttimeend'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
             now = now.replace(days=-int(options['days']))
-            filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+            filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
         DAYS=30
 
@@ -412,16 +412,16 @@ def main():
 
             if not options.get('days'):
                 now = arrow.utcnow()
-                filters['reporttimeend'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+                filters['reporttimeend'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
                 now = now.replace(days=-DAYS)
-                filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+                filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
         ret = cli.search(limit=options['limit'], nolog=options['nolog'], filters=filters, sort=options['sortby'],
                          sort_direction=options['sortby_direction'])
 
         number_returned = len(ret)
 
-        logger.info('returned: {} records'.format(number_returned))
+        logger.info('returned: {0} records'.format(number_returned))
 
         if options.get('aggregate'):
             ret = cli.aggregate(ret, field=options['aggregate'])
@@ -433,7 +433,7 @@ def main():
 
             now = arrow.utcnow()
             now = now.replace(days=-DAYS)
-            wl_filters['reporttime'] = '{}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
+            wl_filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
             wl = cli.search(limit=options['whitelist_limit'], nolog=True, filters=wl_filters)
 
@@ -442,13 +442,13 @@ def main():
             ret = cli.aggregate(ret)
 
             if len(ret) != number_returned:
-                logger.info('aggregation removed: {} records'.format(number_returned - len(ret)))
+                logger.info('aggregation removed: {0} records'.format(number_returned - len(ret)))
 
             ret = f().process(ret, wl)
 
         f = format_factory(options['format'])
         if f is None:
-            raise SystemError('{} format not supported, maybe missing a dependency.'.format(options['format']))
+            raise SystemError('{0} format not supported, maybe missing a dependency.'.format(options['format']))
 
         try:
             if len(ret) >= 1:
