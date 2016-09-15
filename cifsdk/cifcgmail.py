@@ -18,6 +18,7 @@ from cifsdk.client import Client
 from cifsdk.observable import Observable
 import re
 import arrow
+from cgmail.urls import url_to_fqdn
 
 try:
     from urlparse import urlparse
@@ -199,7 +200,7 @@ def main():
         u = u.rstrip('\/')
         u = urlparse(u)
 
-        fqdn = cgmail.urls.url_to_fqdn(u.geturl())
+        fqdn = url_to_fqdn(u.geturl())
         if exclude and exclude.search(fqdn):
             continue
 
