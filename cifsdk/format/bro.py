@@ -6,7 +6,8 @@ from pprint import pprint
 otype = {
     'ipv4': 'ADDR',
     'url': 'URL',
-    'fqdn': 'DOMAIN'
+    'fqdn': 'DOMAIN',
+    'email': 'EMAIL'
 }
 
 HEADER = '#' + '\t'.join(['fields', 'indicator', 'indicator_type', 'meta.desc', 'meta.cif_confidence', 'meta.source'])
