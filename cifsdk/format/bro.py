@@ -7,7 +7,10 @@ otype = {
     'ipv4': 'ADDR',
     'url': 'URL',
     'fqdn': 'DOMAIN',
-    'email': 'EMAIL'
+    'email': 'EMAIL',
+    'md5': 'FILE_HASH',
+    'sha1': 'FILE_HASH',
+    'sha256': 'FILE_HASH',
 }
 
 HEADER = '#' + '\t'.join(['fields', 'indicator', 'indicator_type', 'meta.desc', 'meta.cif_confidence', 'meta.source'])
