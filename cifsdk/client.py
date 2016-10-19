@@ -102,7 +102,7 @@ class Client(object):
 
         body = self.session.get(uri, params=filters, verify=self.verify_ssl)
         self.logger.debug('status code: ' + str(body.status_code))
-        
+
         if body.status_code >= 422:
             max_retries = RETRIES
             while max_retries > 0:
