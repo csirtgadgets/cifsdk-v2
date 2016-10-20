@@ -1,15 +1,20 @@
 language: python
 python:
-    - 3.4
-    - 2.7
+  - 3.5
+  - 2.7
 
 script: py.test
 
 notifications:
-    email:
-        on_success: never
-        on_failure: never
-branches:
-    only:
-        - master
-        - develop
+  email:
+    on_success: never
+    on_failure: never
+
+deploy:
+  provider: pypi
+  user: wesyoung
+  password:
+    secure: b4tBtzOyB0GQwcpQHMmE05FuwhZ4FjEbHw7knTt/vfcgReecWEOB22zwjpDe7lnwJBCEflr/a/Dj19pNuffZrOhRIiQKjqPBO2RDG40ru6QIae9ylQEXnYlUMAZx9i1RW9XmecGpWqc9q9VxbwXBTu5zTDdB+LkDDKiKySHozAGEDtrJ8C+bvCFvyVoE7f8GI61ricT/kpNeM7CJC34WTG56xQt6OYj+8jcIg+QlaWD9DsHZih6NvTtPcBKXc2g1t7jtJ53PUFQDwR9Ame0jsmYb0k4NnIqt7nxNqnpvbHI0QJuk8YuUs5vi4jKIBt+72QemLlutXcoMDhCWh30qro7GyAqMR6dSC2tQVZM0SrFZVZgHiYMTonjbCgXIH9nDH/9ov51G+2hfrFkzexknjQJ3CuP/mMGoZOFVAV7lPl/IF/N/wSL8HdoZk+MRjPeowdHDOObC6dCfykXaGh58dhq0xhxqFbHg8lBb3crhBEUA9PqMDhmZ8U97jDKsPIXqIKirEUy2UtSpb9bDECzqb4vfAJUZ8913ahR90xAVA7TmUKGXrpTWu5UJHjHJcuAuXoXjVgfVP53dEzw39R3sytE6hOm63/w0/TcjMhfhs9K5RAecfZBjAmpFqIWumZXZmZNzQbXU6DlibUPUJHZjBO5yCBYQsoidksRVBx40nc4=
+  on:
+    tags: true
+
