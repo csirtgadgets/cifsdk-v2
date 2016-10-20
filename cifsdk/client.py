@@ -21,13 +21,17 @@ import base64
 from cifsdk import VERSION, API_VERSION
 from cifsdk.constants import REMOTE_ADDR, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY, FEED_LIMIT, TOKEN, FIELDS
 from cifsdk.constants import PINGS, WHITELIST_CONFIDENCE
+from cifsdk.utils import setup_logging, read_config
+from time import sleep
 
 # https://urllib3.readthedocs.org/en/latest/security.html#disabling-warnings
 # http://stackoverflow.com/questions/14789631/hide-userwarning-from-urllib2
 import requests
 requests.packages.urllib3.disable_warnings()
 
-from cifsdk.utils import setup_logging, read_config
+
+RETRIES = os.environ.get('CIFSDK_RETRIES', 4)
+RETRY_SLEEP = 5
 
 
 class Client(object):
@@ -97,8 +101,19 @@ class Client(object):
         self.logger.info('searching...')
 
         body = self.session.get(uri, params=filters, verify=self.verify_ssl)
-
         self.logger.debug('status code: ' + str(body.status_code))
+
+        if body.status_code >= 422:
+            max_retries = RETRIES
+            while max_retries > 0:
+                self.logger.warn('{} found, retrying in {}s... {} tries remaining'.format(body.status_code, RETRY_SLEEP,
+                                                                                          max_retries))
+                sleep(RETRY_SLEEP)
+                body = self.session.get(uri, params=filters, verify=self.verify_ssl)
+                if body.status_code == 200:
+                    break
+                else:
+                    max_retries -= 1
 
         if body.status_code > 299:
             self.logger.warning('request failed: %s' % str(body.status_code))
