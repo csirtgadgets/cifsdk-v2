@@ -1,7 +1,9 @@
 language: python
 python:
   - 3.5
+  - 3.4
   - 2.7
+
 script: py.test
 
 notifications:
@@ -15,4 +17,5 @@ deploy:
   password:
     secure: NHN/ckmXdR/g15AnC5/wA4VWLIODfAR4DY0mr4qajxIAvts83hlB/LNvcEKpN57RUUOt4H8sX4qsLZCdxWpEQfBENxGSazCQYgl91Mi3J5FB9LS6WLVkh691hxEjvcK8XMYPvd+DVhx+Nu6Ew8fyoOk2+slJ1gWFdpkYLFzyP4I=
   on:
+    branch: master
     tags: true
