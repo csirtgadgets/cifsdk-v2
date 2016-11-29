@@ -1,4 +1,8 @@
 import os
+import sys
+PYVERSION = 2
+if sys.version_info > (3,):
+    PYVERSION = 3
 
 LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s[%(lineno)s] - %(message)s'
 
