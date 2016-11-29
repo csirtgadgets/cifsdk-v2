@@ -1,6 +1,7 @@
 
 from cifsdk.format.plugin import Plugin
 import re
+from cifsdk.constants import PYVERSION
 
 from pprint import pprint
 otype = {
@@ -40,8 +41,12 @@ class Bro(Plugin):
                 if isinstance(y, int):
                     y = str(y)
 
-                if isinstance(y, unicode):
-                    y = y.encode('utf-8')
+                if PYVERSION == 2:
+                    if isinstance(y, unicode):
+                        y = y.encode('utf-8')
+                else:
+                    if isinstance(y, bytes):
+                        y = y.encode('utf-8')
 
                 if c is 'otype':
                     y = 'Intel::{0}'.format(otype[d[c]])
