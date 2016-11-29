@@ -16,6 +16,7 @@ otype = {
 HEADER = '#' + '\t'.join(['fields', 'indicator', 'indicator_type', 'meta.desc', 'meta.cif_confidence', 'meta.source'])
 SEP = '|'
 
+
 class Bro(Plugin):
     __name__ = 'bro'
 
@@ -35,7 +36,13 @@ class Bro(Plugin):
                 y = d.get(c, '-')
                 if type(y) is list:
                     y = SEP.join(y)
-                y = str(y)
+
+                if isinstance(y, int):
+                    y = str(y)
+
+                if isinstance(y, unicode):
+                    y = y.encode('utf-8')
+
                 if c is 'otype':
                     y = 'Intel::{0}'.format(otype[d[c]])
                 r.append(y)
