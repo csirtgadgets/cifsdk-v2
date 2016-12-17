@@ -18,6 +18,8 @@ def read_config(args):
         for k in config:
             if not options.get(k):
                 options[k] = config[k]
+    elif os.environ.get('CIF_NO_CONFIG_FILE') == '1':
+        return options
     else:
         print("Unable to read {} config file".format(args.config))
         raise SystemExit

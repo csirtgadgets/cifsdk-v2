@@ -257,7 +257,10 @@ def main():
     p.add_argument('-d', '--debug', dest='debug', action="store_true", help="logging level: DEBUG")
     p.add_argument('-V', '--version', action='version', version=VERSION)
     p.add_argument('--no-verify-ssl', action="store_true", default=False)
-    p.add_argument('-R', '--remote',  help="remote api location")
+    if os.getenv('CIF_REMOTE_ADDR') != None:
+        p.add_argument('-R', '--remote', help="remote api location", default=REMOTE_ADDR)
+    else:
+        p.add_argument('-R', '--remote', help="remote api location")
     p.add_argument('-T', '--token', help="specify token",  default=TOKEN)
     p.add_argument('--timeout',  help='connection timeout [default: %(default)s]', default="300")
     p.add_argument('-C', '--config',  help="configuration file [default: %(default)s]",
