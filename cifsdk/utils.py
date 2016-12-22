@@ -7,22 +7,20 @@ from cifsdk.constants import LOG_FORMAT
 
 def read_config(args):
     options = {}
-    if os.path.isfile(args.config):
-        f = file(args.config)
-        config = yaml.load(f)
-        config = config['client']
-        f.close()
-        if not config:
-            print("Unable to read {} config file".format(args.config))
-            raise SystemExit
-        for k in config:
-            if not options.get(k):
-                options[k] = config[k]
-    elif os.environ.get('CIF_NO_CONFIG_FILE') == '1':
+    if not os.path.isfile(args.config):
         return options
-    else:
-        print("Unable to read {} config file".format(args.config))
-        raise SystemExit
+
+    f = file(args.config)
+    config = yaml.load(f)
+    config = config.get('client')
+    f.close()
+
+    if not config:
+        return options
+
+    for k in config:
+        if not options.get(k):
+            options[k] = config[k]
 
     return options
 
