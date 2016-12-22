@@ -19,7 +19,8 @@ import zlib
 import base64
 
 from cifsdk import VERSION, API_VERSION
-from cifsdk.constants import REMOTE_ADDR, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY, FEED_LIMIT, TOKEN, FIELDS
+from cifsdk.constants import REMOTE_ADDR, REMOTE_ADDR_DEFAULT, LIMIT, FEED_CONFIDENCE, WHITELIST_LIMIT, PROXY, \
+    FEED_LIMIT, TOKEN, FIELDS
 from cifsdk.constants import PINGS, WHITELIST_CONFIDENCE
 from cifsdk.utils import setup_logging, read_config
 from time import sleep
@@ -257,11 +258,8 @@ def main():
     p.add_argument('-d', '--debug', dest='debug', action="store_true", help="logging level: DEBUG")
     p.add_argument('-V', '--version', action='version', version=VERSION)
     p.add_argument('--no-verify-ssl', action="store_true", default=False)
-    if os.getenv('CIF_REMOTE_ADDR') != None:
-        p.add_argument('-R', '--remote', help="remote api location", default=REMOTE_ADDR)
-    else:
-        p.add_argument('-R', '--remote', help="remote api location")
-    p.add_argument('-T', '--token', help="specify token",  default=TOKEN)
+    p.add_argument('-R', '--remote', help="remote api location", default=REMOTE_ADDR)
+    p.add_argument('-T', '--token', help="specify token [default %(default)s", default=TOKEN)
     p.add_argument('--timeout',  help='connection timeout [default: %(default)s]', default="300")
     p.add_argument('-C', '--config',  help="configuration file [default: %(default)s]",
                    default=os.path.expanduser("~/.cif.yml"))
@@ -326,17 +324,27 @@ def main():
     setup_logging(args)
     logger = logging.getLogger(__name__)
 
-    o = read_config(args)
-    options = vars(args)
-    for v in options:
-        if options[v] is None:
-            options[v] = o.get(v)
+    # read in the config
+    config_opts = read_config(args)
+    cmd_options = vars(args)
 
+    # check the config against the arguments
+    for v in cmd_options:
+        if cmd_options[v] is None:
+            cmd_options[v] = config_opts.get(v)
+
+        if v == 'remote':
+            if cmd_options[v] != REMOTE_ADDR_DEFAULT:
+                continue
+            else:
+                cmd_options[v] = config_opts.get('remote', REMOTE_ADDR_DEFAULT)
+
+    options = cmd_options
     if not options.get('token'):
         raise RuntimeError('missing --token')
 
     verify_ssl = True
-    if o.get('no_verify_ssl') or options.get('no_verify_ssl'):
+    if config_opts.get('no_verify_ssl') or options.get('no_verify_ssl'):
         verify_ssl = False
 
     cli = Client(options['token'], remote=options['remote'], proxy=options.get('proxy'), verify_ssl=verify_ssl)

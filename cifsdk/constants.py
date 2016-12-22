@@ -6,8 +6,8 @@ if sys.version_info > (3,):
 
 LOG_FORMAT = '%(asctime)s - %(levelname)s - %(name)s[%(lineno)s] - %(message)s'
 
-REMOTE_ADDR = 'https://localhost'
-REMOTE_ADDR = os.environ.get('CIF_REMOTE_ADDR', REMOTE_ADDR)
+REMOTE_ADDR_DEFAULT = 'https://localhost'
+REMOTE_ADDR = os.environ.get('CIF_REMOTE_ADDR', REMOTE_ADDR_DEFAULT)
 
 LIMIT = 500
 LIMIT = os.environ.get('CIF_LIMIT', LIMIT)
@@ -31,4 +31,4 @@ FIELDS = ['tlp', 'group', 'lasttime', 'reporttime', 'observable', 'otype', 'cc',
           'tags', 'rdata', 'rtype', 'provider', 'altid', 'altid_tlp']
 FIELDS = os.environ.get('CIF_FIELDS', FIELDS)
 
-PINGS=4
+PINGS = 4
