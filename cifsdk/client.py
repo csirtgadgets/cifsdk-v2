@@ -8,6 +8,7 @@ import logging
 import select
 from cifsdk.format import factory as format_factory
 from cifsdk.feed import factory as feed_factory
+from cifsdk.format import plugins as FORMATS
 
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
@@ -266,7 +267,7 @@ def main():
 
     p.add_argument('--sortby', help='sort output [default: %(default)s]', default='lasttime')
     p.add_argument('--sortby-direction', help='sortby direction [default: %(default)s]', default='ASC')
-    p.add_argument('-f', '--format', help="specify output format [default: %(default)s]", default="table")
+    p.add_argument('-f', '--format', help="specify output format [default: %(default)s]", default="table", choices=FORMATS.keys())
 
     # actions
     p.add_argument('-p', '--ping', action="store_true", help="ping")
