@@ -50,7 +50,7 @@ class Bro(Plugin):
 
                 if c is 'otype':
                     y = 'Intel::{0}'.format(otype[d[c]])
-                r.append(y)
+                r.append(str(y))
             text.append("\t".join(r))
 
         text = "\n".join(text)
