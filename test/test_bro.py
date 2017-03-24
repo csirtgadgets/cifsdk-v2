@@ -13,7 +13,7 @@ def test_format_bro():
             'otype': 'fqdn'
         },
         {
-            'observable': "http://example.com/1234.htm",
+            'observable': "http://example.com/http.htm",
             'provider': "me.com",
             'tlp': "amber",
             'confidence': "85",
@@ -21,7 +21,15 @@ def test_format_bro():
             'otype': 'url',
         },
         {
-            'observable': "https://example.com/1234.htm",
+            'observable': "https://example.com/https.htm",
+            'provider': "me.com",
+            'tlp': "amber",
+            'confidence': "85",
+            'reporttime': '2015-01-01T00:00:00Z',
+            'otype': 'url',
+        },
+        {
+            'observable': "ftp://example.com/ftp.htm",
             'provider': "me.com",
             'tlp': "amber",
             'confidence': "85",
