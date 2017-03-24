@@ -50,13 +50,15 @@ def test_format_bro():
             'tlp': "amber",
             'confidence': "85",
             'reporttime': '2015-01-01T00:00:00Z',
-            'otype': 'ipv4'
+            'otype': 'url'
         }
     ]
 
     text = str(Bro(data))
     print(text)
-    assert text
+    assert 'http://' not in  text
+    assert 'https://' not in text
+    assert 'ftp://' not in text
 
 if __name__ == '__main__':
     test_format_bro()

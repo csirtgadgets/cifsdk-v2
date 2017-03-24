@@ -31,7 +31,7 @@ class Bro(Plugin):
         for d in self.data:
             r = []
             if d['otype'] == 'url':
-                d['observable'] = re.sub(r'([ftp|https?]\:\/\/)', '', d['observable'])
+                d['observable'] = re.sub(r'((ftp|https?)\:\/\/)', '', d['observable'])
 
             for c in self.cols:
                 y = d.get(c, '-')
