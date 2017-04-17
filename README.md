@@ -12,14 +12,14 @@ bin/cif command on the server. This SDK is meant to be used as a client interact
 ## Ubuntu
   ```bash
   $ sudo apt-get install -y python-dev python-pip git
-  $ pip install cifsdk
+  $ pip install 'cifsdk>=2.0,<3.0'
   ```
 ## CentOS v 7
   ```bash
   $ yum -y update
   $ sudo rpm -iUvh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
   $ sudo yum install -y gcc python-pip python-devel git libffi-devel openssl-devel python-virtualenvwrapper python-virtualenv
-  $ pip install cifsdk
+  $ pip install 'cifsdk>=2.0,<3.0'
   ```
 # Examples
 ## Client
