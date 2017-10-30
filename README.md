@@ -1,7 +1,7 @@
 # CIF Software Development Kit for Python
 The CIF  Software Development Kit (SDK) for Python contains library code and examples designed to enable developers to build applications using CIF.
 
-[![Build Status](https://travis-ci.org/csirtgadgets/py-cifsdk.png?branch=master)](https://travis-ci.org/csirtgadgets/py-cifsdk)
+[![Build Status](https://travis-ci.org/csirtgadgets/cif-sdk-py.png?branch=master)](https://travis-ci.org/csirtgadgets/cif-sdk-py)
 
 # WARNING
 **Before you begin, be careful when installing this on a CIF Server Instance. This WILL OVERWRITE the p5-cif-sdk 
