@@ -123,7 +123,7 @@ class Client(object):
         s = (int(body.headers['Content-Length']) / 1024 / 1024)
         self.logger.info('processing {0} megs'.format(s))
 
-        ret = body.content
+        ret = body.text
         if not ret.startswith('['):
             self.logger.info('trying to decompress...')
             # http://stackoverflow.com/a/2695575
