@@ -433,6 +433,9 @@ def main():
         DAYS=30
 
         if options.get('feed'):
+            if not options.get('otype'):
+                logger.error('--otype [ipv4|ipv6|fqdn|url|..] flag required when using --feed')
+                raise SystemExit
             if options['limit'] == LIMIT:
                 options['limit'] = FEED_LIMIT
 
