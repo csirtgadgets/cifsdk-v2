@@ -123,7 +123,7 @@ class Client(object):
         s = (int(body.headers['Content-Length']) / 1024 / 1024)
         self.logger.info('processing {0} megs'.format(s))
 
-        ret = body.content
+        ret = body.text
         if not ret.startswith('['):
             self.logger.info('trying to decompress...')
             # http://stackoverflow.com/a/2695575
@@ -295,7 +295,7 @@ def main():
     p.add_argument('--rdata', help='filter by rdata')
     p.add_argument('--provider', help='filter by provider')
     p.add_argument('--asn', help='filter by asn')
-    p.add_argument('--tlp', help='filter by tlp')
+    #p.add_argument('--tlp', help='filter by tlp')
     p.add_argument('--proxy', help="specify a proxy to use [default %(default)s]", default=PROXY)
 
     p.add_argument('--feed', action="store_true", help="generate a feed of data, meaning deduplicated and whitelisted")
@@ -397,8 +397,8 @@ def main():
         if options.get('asn'):
             filters['asn'] = options['asn']
 
-        if options.get('tlp'):
-            filters['tlp'] = options['tlp']
+        #if options.get('tlp'):
+        #    filters['tlp'] = options['tlp']
 
         if options.get('group'):
             filters['group'] = options['group']
@@ -433,6 +433,9 @@ def main():
         DAYS=30
 
         if options.get('feed'):
+            if not options.get('otype'):
+                logger.error('--otype [ipv4|ipv6|fqdn|url|..] flag required when using --feed')
+                raise SystemExit
             if options['limit'] == LIMIT:
                 options['limit'] = FEED_LIMIT
 

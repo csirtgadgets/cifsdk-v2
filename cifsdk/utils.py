@@ -2,7 +2,7 @@ import pkgutil
 import logging
 import yaml
 import os
-from cifsdk.constants import LOG_FORMAT
+from cifsdk.constants import LOG_FORMAT, PYVERSION
 
 
 def read_config(args):
@@ -10,7 +10,7 @@ def read_config(args):
     if not os.path.isfile(args.config):
         return options
 
-    f = file(args.config)
+    f = open(args.config)
     config = yaml.load(f)
     config = config.get('client')
     f.close()
