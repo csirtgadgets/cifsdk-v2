@@ -1,7 +1,7 @@
 # CIF Software Development Kit for Python
 The CIF  Software Development Kit (SDK) for Python contains library code and examples designed to enable developers to build applications using CIF.
 
-[![Build Status](https://travis-ci.org/csirtgadgets/py-cifsdk.png?branch=master)](https://travis-ci.org/csirtgadgets/py-cifsdk)
+[![Build Status](https://travis-ci.org/csirtgadgets/cif-sdk-py.png?branch=master)](https://travis-ci.org/csirtgadgets/cif-sdk-py)
 
 # WARNING
 **Before you begin, be careful when installing this on a CIF Server Instance. This WILL OVERWRITE the p5-cif-sdk 
@@ -12,14 +12,14 @@ bin/cif command on the server. This SDK is meant to be used as a client interact
 ## Ubuntu
   ```bash
   $ sudo apt-get install -y python-dev python-pip git
-  $ pip install cifsdk
+  $ pip install 'cifsdk>=2.0,<3.0'
   ```
 ## CentOS v 7
   ```bash
   $ yum -y update
   $ sudo rpm -iUvh http://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
   $ sudo yum install -y gcc python-pip python-devel git libffi-devel openssl-devel python-virtualenvwrapper python-virtualenv
-  $ pip install cifsdk
+  $ pip install 'cifsdk>=2.0,<3.0'
   ```
 # Examples
 ## Client
