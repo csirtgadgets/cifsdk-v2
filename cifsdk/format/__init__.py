@@ -4,6 +4,7 @@ from cifsdk.format.table import Table
 from cifsdk.format.bro import Bro
 from cifsdk.format.cifsnort import Snort
 from cifsdk.format.cifbind import Bind
+from cifsdk.format.cifbindrpz import BindRPZ
 
 plugins = {
     'json': Json,
@@ -12,6 +13,7 @@ plugins = {
     'bro': Bro,
     'snort': Snort,
     'bind': Bind,
+    'bindrpz' : BindRPZ,
 }
 
 try:
