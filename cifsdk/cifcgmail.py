@@ -156,7 +156,7 @@ def main():
         }
         now = arrow.utcnow()
         filters['reporttimeend'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
-        now = now.replace(days=-7)
+        now = now.shift(days=-7)
         filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
         ret = cli.search(limit=50000, filters=filters, sort='reporttime', sort_direction='desc')
@@ -178,7 +178,7 @@ def main():
         }
         now = arrow.utcnow()
         filters['reporttimeend'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
-        now = now.replace(days=-7)
+        now = now.shift(days=-7)
         filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
         ret = cli.search(limit=50000, filters=filters, sort='reporttime', sort_direction='desc')

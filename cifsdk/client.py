@@ -413,12 +413,12 @@ def main():
         if options.get('last_day'):
             now = arrow.utcnow()
             filters['reporttimeend'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
-            now = now.replace(days=-1)
+            now = now.shift(days=-1)
             filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
         elif options.get('last_hour'):
             now = arrow.utcnow()
             filters['reporttimeend'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
-            now = now.replace(hours=-1)
+            now = now.shift(hours=-1)
             filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
         elif options.get('today'):
             now = arrow.utcnow()
@@ -427,7 +427,7 @@ def main():
         if options.get('days'):
             now = arrow.utcnow()
             filters['reporttimeend'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
-            now = now.replace(days=-int(options['days']))
+            now = now.shift(days=-int(options['days']))
             filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
         DAYS=30
@@ -442,7 +442,7 @@ def main():
             if not options.get('days'):
                 now = arrow.utcnow()
                 filters['reporttimeend'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
-                now = now.replace(days=-DAYS)
+                now = now.shift(days=-DAYS)
                 filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
         ret = cli.search(limit=options['limit'], nolog=options['nolog'], filters=filters, sort=options['sortby'],
@@ -461,7 +461,7 @@ def main():
             wl_filters['confidence'] = args.whitelist_confidence
 
             now = arrow.utcnow()
-            now = now.replace(days=-DAYS)
+            now = now.shift(days=-DAYS)
             wl_filters['reporttime'] = '{0}Z'.format(now.format('YYYY-MM-DDTHH:mm:ss'))
 
             wl = cli.search(limit=options['whitelist_limit'], nolog=True, filters=wl_filters)
